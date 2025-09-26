@@ -1,0 +1,24 @@
+git commit 
+- upload code changes to branch
+- '-m' argument adds comment
+
+git branch 
+- create branch
+
+git checkout 
+- switch to branch
+
+git pull 
+- pull and sync changes on remote
+
+git push 
+- push local changes to remote
+
+git merge 
+- merge changes from one branch to another branch, committing the merge on top of target branch commit history
+
+git rebase 
+- merge changes from one branch to another branch, overwriting commit history on target branch
+
+git fetch 
+- check for changes on remote
