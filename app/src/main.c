@@ -49,11 +49,20 @@ int main(void) {
 
     while(1) {
         gpio_pin_toggle_dt(&led0);                          // Toggle the state of the GPIO pin connected to LED0
-        gpio_pin_toggle_dt(&led1);                          // Toggle the state of the GPIO pin connected to LED1
-        gpio_pin_toggle_dt(&led2);                          // Toggle the state of the GPIO pin connected to LED2
+
+        k_msleep(250);                                      // Wait 250ms
+
         gpio_pin_toggle_dt(&led3);                          // Toggle the state of the GPIO pin connected to LED3
 
-        k_msleep(500);                                      // Wait 500ms
+        k_msleep(250);                                      // Wait 250ms
+
+        gpio_pin_toggle_dt(&led1);                          // Toggle the state of the GPIO pin connected to LED1
+
+        k_msleep(250);                                      // Wait 250ms
+
+        gpio_pin_toggle_dt(&led2);                          // Toggle the state of the GPIO pin connected to LED2
+        
+        k_msleep(250);                                      // Wait 250ms
     }
 
     return 0;
