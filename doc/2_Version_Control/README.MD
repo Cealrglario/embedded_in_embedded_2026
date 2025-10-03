@@ -42,11 +42,12 @@ Microsofts VSCode is the recommended IDE for EIE, however any other will also wo
 1. If you don't already have VSCode installed install it from [here](https://code.visualstudio.com/) and run the installer.
 2. Open git bash or the terminal
 3. Navigate to the project folder from lesson one. It should be in your user directory under `zephyr-projects/<project-name>` with project name defaulting to `eie_nrf52840.git`.
-4. Run `git fetch upstream main` and `git pull upstream main`
-5. Run `code .` to open vscode
-6. Navigate to the extensions tab on the left
-7. Type @recommended into the extension search bar
-8. Install every extension from the workplace recommendations
+4. Add the upstream repository to your project. Run `git remote add upstream https://github.com/eiefirmware/eie_nrf52840.git`
+5. Run `git fetch upstream main` and `git pull upstream main`
+6. Run `code .` to open vscode
+7. Navigate to the extensions tab on the left
+8. Type @recommended into the extension search bar
+9. Install every extension from the workplace recommendations
 
 ## Lesson
 
@@ -97,9 +98,10 @@ To do so, we're going to go through a set of lessons and exercises:
         2. Newest commit is shown at the top, with older commits shown below
         3. **If your terminal shows a colon in the bottom left and isn't letting you type commands as usual, press `q` to exit back to a normal terminal session**
     12. Check that you no longer see your new file as a "change" in `git status`
-    13. "Push" your new `lesson2` branch and its commit to your fork of the EiE project repo on GitHub with `git push -u lesson2`
+    13. "Push" your new `lesson2` branch and its commit to your fork of the EiE project repo on GitHub with `git push -u origin lesson2`
         1. You will be prompted for/asked to set your GitHub username and password if you haven't pushed to GitHub before
-        2. The `-u lesson2` is only needed because this is the *first* time that we're pushing the `lesson2` branch to GitHub (it tells GitHub to make this new branch on the remote). After this, you should only run `git push`.
+        2. The `-u origin lesson2` is only needed because this is the *first* time that we're pushing the `lesson2` branch to GitHub (it tells GitHub to make this new branch on the remote). After this, you should only run `git push`.
+            1. **If you run into an issue where Git asks for your password but fails with an error saying "Password authentication is disabled", see the "Personal Access Tokens" section below.**
     14. Check on GitHub that **your fork** of the `eie_nrf52840` repo has a new `lesson2` branch, and that your cheatsheet is on it
 3. Congratulations! You've now completed an initial Git workflow!
 4. You've now learned a few new Git commands, why not add them to your cheatsheet?
@@ -107,7 +109,7 @@ To do so, we're going to go through a set of lessons and exercises:
         1. `git add`
         2. `git status`
         3. `git log`
-        4. A note about `-u <branch>` under `git push`
+        4. A note about `-u <remote> <branch>` under `git push`
     2. Once the changes have been added, check what's changed with `git diff`
         1. Might as well add that to the cheatsheet too!
         2. **If your terminal shows a colon in the bottom left and isn't letting you type commands as usual, press `q` to exit back to a normal terminal session**
@@ -135,3 +137,25 @@ In general, a good Git process to follow for EiE is as follows:
 5. At the end of the lesson, push your `lesson#` branch to GitHub
 
 Of course, feel free to experiment with different workflows, but always be prepeared to explain what you've done to anyone you're expecting help from!
+
+## Personal Access Tokens
+
+GitHub disabled password authentication a while ago.
+Instead of a password, you need to use a "Personal Access Token".
+We can generate one as follows:
+
+1. Run `git config --global user.name '<YOUR_NAME>'` in your terminal
+2. Run `git config --global user.email '<YOUR_GITHUB_EMAIL>'` in your terminal
+3. Run `git config credential.helper 'store'` in your terminal
+4. On GitHub, go to your user settings
+5. Scroll down and select "Developer Settings" from the menu on the left
+6. Select "Personal Access Tokens" from the menu on the left
+7. Select "Tokens (classic)", then "Generate new token (classic)"
+8. Give the token a name like "Git Bash Laptop" or similar
+9. Set the expiration to either "90 days" or "No expiration"
+    1. If you set an expiration, you'll have to repeat this process after the token expires
+10. Check the "repo" tick box
+11. Hit "Generate"
+12. Copy the token from GitHub
+13. From the command line, run your `git push` command again, enter your username as normal, but instead of a password, press `ctrl+shft+V` to paste the access token
+14. Press enter, and everything should work!
