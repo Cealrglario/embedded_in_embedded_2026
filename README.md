@@ -1,8 +1,7 @@
-# Embedded In Embedded nRF52840
+# Embedded In Embedded w/ nRF52840
 
 EiE is a mentoring program for university engineering students that was started in 2002 at the University of Calgary. The program connects industry engineers with students interested in embedded systems. Together they explore the practical, hands-on technical side of embedded development while building great relationships.
 https://embeddedinembedded.com/
-
 
 [TOC]
 
