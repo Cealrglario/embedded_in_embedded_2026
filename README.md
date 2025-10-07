@@ -1,10 +1,5 @@
-# Embedded In Embedded nRF52840
-
-EiE is a mentoring program for university engineering students that was started in 2002 at the University of Calgary. The program connects industry engineers with students interested in embedded systems. Together they explore the practical, hands-on technical side of embedded development while building great relationships.
-https://embeddedinembedded.com/
-
-
-[TOC]
+# Embedded Primer
+This branch is for implementing and testing initial embedded development concepts on the nRF52840 specifically pertaining to the Zephyr RTOS.
 
 ## Hardware
 
