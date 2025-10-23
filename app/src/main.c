@@ -32,7 +32,27 @@ uint8_t counter = 0b0;
       counter++;
 
       if (counter & LED_0_COUNT) {
-        LED_toggle(LED0);
+        LED_set(LED0, LED_ON);
+      } else {
+        LED_set(LED0, LED_OFF);
+      }
+
+      if (counter & LED_1_COUNT) {
+        LED_set(LED1, LED_ON);
+      } else {
+        LED_set(LED1, LED_OFF);
+      }
+
+      if (counter & LED_2_COUNT) {
+        LED_set(LED2, LED_ON);
+      } else {
+        LED_set(LED2, LED_OFF);
+      }
+
+      if (counter & LED_3_COUNT) {
+        LED_set(LED3, LED_ON);
+      } else {
+        LED_set(LED3, LED_OFF);
       }
 
       if (15 == counter) {
