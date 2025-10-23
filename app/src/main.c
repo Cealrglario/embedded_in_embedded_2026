@@ -9,10 +9,10 @@
 #define SLEEP_MS 1
 
 // Define some bitmasks to let LEDs represent binary positions
-#define LED_0_COUNT 0b0001
-#define LED_1_COUNT 0b0010  
-#define LED_2_COUNT 0b0100
-#define LED_3_COUNT 0b1000
+#define BIT_0 0b0001
+#define BIT_1 0b0010  
+#define BIT_2 0b0100
+#define BIT_3 0b1000
 
 int main(void) {
   // Initialize button API
@@ -31,31 +31,31 @@ uint8_t counter = 0b0;
     if (BTN_check_clear_pressed(BTN0)) {
       counter++;
 
-      if (counter & LED_0_COUNT) {
+      if (counter & BIT_0) {
         LED_set(LED0, LED_ON);
       } else {
         LED_set(LED0, LED_OFF);
       }
 
-      if (counter & LED_1_COUNT) {
+      if (counter & BIT_1) {
         LED_set(LED1, LED_ON);
       } else {
         LED_set(LED1, LED_OFF);
       }
 
-      if (counter & LED_2_COUNT) {
+      if (counter & BIT_2) {
         LED_set(LED2, LED_ON);
       } else {
         LED_set(LED2, LED_OFF);
       }
 
-      if (counter & LED_3_COUNT) {
+      if (counter & BIT_3) {
         LED_set(LED3, LED_ON);
       } else {
         LED_set(LED3, LED_OFF);
       }
 
-      if (15 == counter) {
+      if (15 < counter) {
         counter = 0;
       }
     }
