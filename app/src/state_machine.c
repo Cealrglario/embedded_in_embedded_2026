@@ -86,7 +86,7 @@ static enum smf_state_result led_off_state_run(void* o) {
     } else {
         led_state_object.count++;
     }
-
+    
     // Standard return result for non-hierarchical state machines
     return SMF_EVENT_HANDLED;
 }
