@@ -12,6 +12,7 @@ project(app LANGUAGES C)
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE ../drivers/LED/led.c)
 target_sources(app PRIVATE ../drivers/BTN/btn.c)
+target_sources(app PRIVATE src/state_machine.c)
 
 target_include_directories(app PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../drivers
