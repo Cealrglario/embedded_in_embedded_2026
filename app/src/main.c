@@ -51,6 +51,7 @@ static const struct bt_data ble_scan_response_data[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, CONFIG_BT_DEVICE_NAME, sizeof(CONFIG_BT_DEVICE_NAME) - 1),
 };
 
+// Stores the data written to or read from the BLE peripheral
 static uint8_t ble_custom_characteristic_user_data[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1] =
     {'E', 'i', 'E'};
 
@@ -100,7 +101,7 @@ static ssize_t ble_custom_service_write(struct bt_conn* conn, const struct bt_ga
   }
 
   memcpy(value + offset, buf, len);
-  value[offset + len] = 0;
+  value[offset + len] = 0;  // Null termination
 
   printk("[BLE] ble_custom_service_write (%d, %d):", offset, len);
   for (uint16_t i = 0; i < len; i++) {
