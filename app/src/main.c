@@ -39,11 +39,23 @@ static void ble_on_device_disconnected(struct bt_conn* conn, uint8_t err) {
   if (err) {
     printk("Device disconnected due to an error: %s\n", bt_hci_err_to_str(err));
   } else {
-    printk("Device disconnected: %s\n", bt_hci_err_to_str(reason));
+    printk("Device disconnected.\n");
   }
 
   bt_conn_unref(my_connection);
   my_connection = NULL;
+}
+
+static bool ble_get_adv_device_name_cb(struct bt_data* data, void* user_data) {
+  char* name = user_data; // points to a region of memory that will store any user data
+
+  if (data->type == BT_DATA_NAME_COMPLETE || data->type == BT_DATA_NAME_SHORTENED) {  // if the data received contains device name
+    memcpy(name, data->data, data->data_len); // copy device name into appropriate memory space
+    name[data->data_len] = 0; // null terminate the name
+    return false; // stop parsing the name
+  }
+
+  return true;  // continue looking through the received advertising packet for the device name
 }
 
 static void ble_on_advertisement_received(const bt_addr_le_t* addr, int8_t rssi, uint8_t type,
@@ -66,7 +78,7 @@ static void ble_on_advertisement_received(const bt_addr_le_t* addr, int8_t rssi,
     printk("Advertisement received from device with name: %s and MAC address: %s\n", name, str_addr);
 
     // return if connection isn't strong
-    if (rssi < -50) {
+    if (rssi < -60) {
       return;
     }
     else {  // if name matches
@@ -81,18 +93,6 @@ static void ble_on_advertisement_received(const bt_addr_le_t* addr, int8_t rssi,
       }
     }
   }
-}
-
-static void ble_get_adv_device_name_cb(struct bt_data* data, void* user_data) {
-  char* name = user_data; // points to a region of memory that will store any user data
-
-  if (data->type == BT_DATA_NAME_COMPLETE || data->type == BT_DATA_NAME_SHORTENED) {  // if the data received contains device name
-    memcpy(name, data->data, data->data_len); // copy device name into appropriate memory space
-    name[data->data_len] = 0; // null terminate the name
-    return false; // stop parsing the name
-  }
-
-  return true;  // continue looking through the received advertising packet for the device name
 }
 
 // Tell the OS to use the connect/disconnect callback funcs during connection events
