@@ -31,6 +31,7 @@ static void ble_on_device_connected(struct bt_conn* conn, uint8_t err) {
   } else {
     char addr[BT_ADDR_LE_STR_LEN];
     bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr)); // get the connected device's MAC address as a string
+    
     printk("Connected to device with MAC address: %s\n", addr);
   }
 }
@@ -60,10 +61,12 @@ static bool ble_get_adv_device_name_cb(struct bt_data* data, void* user_data) {
 
 static void ble_on_advertisement_received(const bt_addr_le_t* addr, int8_t rssi, uint8_t type,
                                           struct net_buf_simple* ad) {
-  if (NULL != my_connection) {  // we already have a connection
+  if (my_connection != NULL) {  // we already have a connection
+    // printk("Connection already established, ignoring advertisement.\n");
     return;
   }
-  else if (BT_GAP_ADV_TYPE_ADV_IND != type || BT_GAP_ADV_TYPE_ADV_DIRECT_IND != type) { // if the advertisement is "non-connectable"
+  else if (BT_GAP_ADV_TYPE_ADV_IND != type && BT_GAP_ADV_TYPE_ADV_DIRECT_IND != type) { // if the advertisement is "non-connectable"
+    // printk("Advertisement received but is not connectable.\n");
     return;
   }
   else {  // process the incoming advertisement
@@ -78,7 +81,7 @@ static void ble_on_advertisement_received(const bt_addr_le_t* addr, int8_t rssi,
     printk("Advertisement received from device with name: %s and MAC address: %s\n", name, str_addr);
 
     // return if connection isn't strong
-    if (rssi < -60) {
+    if (rssi < -65) {
       return;
     }
     else {  // if name matches
