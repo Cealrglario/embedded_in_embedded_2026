@@ -32,7 +32,9 @@ static const struct spi_cs_control cs_ctrl = (struct spi_cs_control) {
   .delay = 1u,
 };
 
-static const struct device * dev = DEVICE_DT_GET(ARDUINO_SPI_NODE);
+static const struct device* dev = DEVICE_DT_GET(ARDUINO_SPI_NODE);  // Selects the SPI peripheral to talk to
+
+// Configure our SPI communication
 static const struct spi_config spi_cfg = {
   .frequency = 1000000, // Using a 1MHz clock
 
@@ -41,10 +43,11 @@ static const struct spi_config spi_cfg = {
   // Configure as SPI master with 8 byte words and MSB transferred out first
   .operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8) | SPI_TRANSFER_MSB,
   .slave = 0,
-  .cs = &cs_ctrl,
+  .cs = cs_ctrl,
 };
 
-static void lcd_cmd(uint8_t cmd, struct spi_buf * data) {
+// To send commands/data to the LCD
+static void lcd_cmd(uint8_t cmd, struct spi_buf* data) {
   struct spi_buf cmd_buf[1] = {[0]={.buf=&cmd, .len=1}};
   struct spi_buf_set cmd_set = {.buffers=cmd_buf, .count=1};
 
@@ -94,8 +97,6 @@ int main(void) {
   k_msleep(120);  // Software reset command can take up to 120 ms before any more commands can be sent
 
   lcd_cmd(CMD_SLEEP_OUT, NULL);
-  k_msleep(120);
-
   lcd_cmd(CMD_DISPLAY_ON, NULL);
 
   uint8_t column_data[] = {[0]=0x00, [1]=0x95, [2]=0x00, [3]=0x9f}; // Column 149 to 159
