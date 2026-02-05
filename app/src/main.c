@@ -32,7 +32,7 @@ typedef enum {
 } touch_event_t;
 
 #define ARDUINO_I2C_NODE DT_NODELABEL(arduino_i2c)  // Access the I2C peripheral from the device tree
-static const struct device* i2c_dev = DEVICE_DT_GET(ARDUINO_I2C_NODE) // Create an I2C "device" from the on-board peripheral
+static const struct device* i2c_dev = DEVICE_DT_GET(ARDUINO_I2C_NODE); // Create an I2C "device" from the on-board peripheral
 
 void touch_control_cmd_rsp(uint8_t cmd, uint8_t* rsp) {
   struct i2c_msg cmd_rsp_msg[2] = {
