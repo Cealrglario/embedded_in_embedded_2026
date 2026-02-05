@@ -100,15 +100,15 @@ int main(void) {
   lcd_cmd(CMD_DISPLAY_ON, NULL);
 
   // Remember, MSB sent out first, so [0] is the MSB for each "packet"
-  uint8_t column_data[] = {[0]=0x00, [1]=0x6E, [2]=0x00, [3]=0x82}; // Column 110 to 130
-  uint8_t row_data[] = {[0]=0x00, [1]=0x96, [2]=0x00, [3]=0xAA}; // Row 150 to 170
+  uint8_t column_data[] = {[0]=0x00, [1]=0x95, [2]=0x00, [3]=0x9F}; // Column 149 to 159
+  uint8_t row_data[] = {[0]=0x00, [1]=0x75, [2]=0x00, [3]=0x7F}; // Row 117 to 127
   uint8_t color_data[300];
 
   // For each pixel in our designated region above
   for (int i = 0; i < 300; i+=3) {
-    color_data[i] = 0; // B
+    color_data[i] = 0xFC; // R
     color_data[i+1] = 0;  // G
-    color_data[i+2] = 0xFC;  // R
+    color_data[i+2] = 0;  // B
   }
 
   struct spi_buf column_data_buf = {.buf=column_data, .len=4};
