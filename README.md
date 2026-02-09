@@ -1,4 +1,8 @@
-# Embedded In Embedded w/ nRF52840
+# Main Repository
+This repository will be used for the development of a final project to complete the EiE program for its 2025-2026 run. Exact project details are, as of yet, unknown, as I have yet to choose a project to work on, but this branch will be updated more and more with precise project details and planning documents as time goes on.
+
+# EiE Program Details
+## Embedded In Embedded w/ nRF52840
 
 EiE is a mentoring program for university engineering students that was started in 2002 at the University of Calgary. The program connects industry engineers with students interested in embedded systems. Together they explore the practical, hands-on technical side of embedded development while building great relationships.
 https://embeddedinembedded.com/
