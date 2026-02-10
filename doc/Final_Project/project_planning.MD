@@ -10,7 +10,7 @@ We want to develop considering best practices
 - Zephyr logic and HAL
 
 ## Ideas
-~~### 1. Thermal/IR camera (extra costs)~~ -> NOT CHOSEN DUE TO COSTS
+### 1. Thermal/IR camera (extra costs) -> NOT CHOSEN DUE TO COSTS
 ~~Description:~~
 ~~- Connect a thermal/IR sensor to the nRF52840, maybe using a breadboard, that displays a heatmap onto the LCD.~~
 
