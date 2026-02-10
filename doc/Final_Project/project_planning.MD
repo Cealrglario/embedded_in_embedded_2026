@@ -10,20 +10,20 @@ We want to develop considering best practices
 - Zephyr logic and HAL
 
 ## Ideas
-### 1. Thermal/IR camera (extra costs)
-Description:
-- Connect a thermal/IR sensor to the nRF52840, maybe using a breadboard, that displays a heatmap onto the LCD.
+~~### 1. Thermal/IR camera (extra costs)~~ -> NOT CHOSEN DUE TO COSTS
+~~Description:~~
+~~- Connect a thermal/IR sensor to the nRF52840, maybe using a breadboard, that displays a heatmap onto the LCD.~~
 
-LCD/LVGL functionality:
-- Display an "upscaled" and zoomed out heatmap to the LCD.
+~~LCD/LVGL functionality:~~
+~~- Display an "upscaled" and zoomed out heatmap to the LCD.~~
 
-Bluetooth:
-- Transmit heatmap over bluetooth to a web server or mobile application to view heatmap online/on a bigger screen.
+~~Bluetooth:~~
+~~- Transmit heatmap over bluetooth to a web server or mobile application to view heatmap online/on a bigger screen.~~
 
-Touchscreen:
-- Buttons to toggle UI elements like temperature, distance to center, etc.
+~~Touchscreen:~~
+~~- Buttons to toggle UI elements like temperature, distance to center, etc.~~
 
-### 2. Desktop/laptop "sidecar"
+### 2. Desktop/laptop "sidecar" -> CHOSEN IDEA
 Description:
 - Run a script on a desktop/laptop that, over bluetooth, sends PC metrics and usage details to the nRF52840 that displays details and potential interaction options onto the LCD.
 
