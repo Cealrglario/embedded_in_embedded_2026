@@ -45,7 +45,7 @@ LVGL setup
 static const struct device* display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
 
 // An LVGL object representing the LCD we will be displaying content onto
-static lv_obj_t* screen = NULL;
+lv_obj_t* screen = NULL;
 
 // To store the x and y position of a touch between checks
 // We want these to be static so that the last touch position is stored instead of being set to (0, 0) every call
@@ -101,6 +101,10 @@ void touch_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
 }
 
 int main(void) {
+  /**
+   * Initialization checks
+   */
+
   // If the I2C peripheral is not yet ready
   if(!device_is_ready(i2c_dev)) {
     printk("I2C device not yet ready.\n");
@@ -125,6 +129,9 @@ int main(void) {
     return 0;
   }
 
+  // "Turn on" the screen so we can actually see things on it
+  display_blanking_off(display_dev);
+
   if (0 > BTN_init()) {
     printk("Buttons not yet ready.\n");
     return 0;
@@ -138,42 +145,22 @@ int main(void) {
   // Initialize the state machine
   state_machine_init();
 
-  if (0 > state_machine_run()) {
-    printk("State machine not yet ready.\n");
-    return 0;
-  }
-
-  /**
-   * The following "main menu" code should be put into its own main_menu state
-   */
-
-  // We would initialize objects to display onto the LVGL screen here
-  for (uint8_t i = 0; i < HOME_SCREEN_BUTTONS; i++) {
-    lv_obj_t* ui_btn = lv_button_create(screen); // Add a button to the screen
-
-    // Place the buttons in the center of the screen
-    lv_obj_align(ui_btn, LV_ALIGN_CENTER, 0, VERTICAL_SPACING_MULTIPLIER * (i % 2 ? 1 : -1));
-
-    // Add text to the button
-    lv_obj_t* button_label = lv_label_create(ui_btn); 
-    char label_text[BUTTON_TEXT_MAX_LENGTH];
-    snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Media Controls");
-    lv_label_set_text(button_label, label_text);
-    lv_obj_align(button_label, LV_ALIGN_CENTER, 0, 0);
-  }
-
-  // "Turn on" the screen so we can actually see things on it
-  display_blanking_off(display_dev);
-
   // Set up LVGL so that the button press callback is called every SLEEP_MS period
   // NOTE: "lv_indev" means "LVGL input device", and our input, a touchscreen is of type "pointer" (like a cursor)
   lv_indev_t* indev = lv_indev_create();
   lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(indev, touch_read_cb);
 
+  /**
+   * Run the state machine
+   */
+
   while (1) {
-    // Check touches and refresh LCD every SLEEP_MS milliseconds
-    lv_timer_handler();
+    if (0 > state_machine_run()) {
+      printk("Error occured while running state machine.\n");
+      return 0;
+    }
+
     k_msleep(SLEEP_MS);
   }
   return 0;
