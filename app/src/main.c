@@ -15,6 +15,7 @@
 #include "SPI_defines.h"
 #include "BTN.h"
 #include "LED.h"
+#include "lv_data_obj.h"
 
 /*
 
