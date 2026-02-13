@@ -1,8 +1,7 @@
 #ifndef TOUCHSCREEN_DEFINES_H
 #define TOUCHSCREEN_DEFINES_H
 
-// We want to sleep for only 16ms at a time to emulate a ~60Hz response rate from the LCD/touchscreen
-#define SLEEP_MS 16
+#define SLEEP_MS 5
 
 // "Retrieve" the I2C peripheral from the device tree
 #define ARDUINO_I2C_NODE DT_NODELABEL(arduino_i2c)   

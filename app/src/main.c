@@ -17,6 +17,25 @@
 
 /*
 
+Touchscreen-specific I2C setup
+
+*/
+
+static const struct device* i2c_dev = DEVICE_DT_GET(ARDUINO_I2C_NODE); // Select an I2C "device" from the on-board peripheral
+
+// To send commands to and read responses from the I2C slave
+void touch_control_cmd_rsp(uint8_t cmd, uint8_t* rsp) {
+  struct i2c_msg cmd_rsp_msg[2] = {
+    [0] = {.buf=&cmd, .len=1, .flags=I2C_MSG_WRITE},
+    [1] = {.buf=rsp, .len=1, .flags=I2C_MSG_RESTART | I2C_MSG_READ | I2C_MSG_STOP}
+  };
+
+  // Send a command to and receive a response from the I2C slave 
+  i2c_transfer(i2c_dev, cmd_rsp_msg, 2, TD_ADDR);
+}
+
+/*
+
 LVGL setup
 
 */
@@ -64,8 +83,6 @@ void touch_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
     data->point.x = x_pos;
     data->point.y = y_pos;
     data->state = LV_INDEV_STATE_PRESSED;
-
-    printk("Touch at %u, %u\n", x_pos, y_pos);
   }
   // If the screen isn't currently being touched (released)
   else if (touch_status == 0) {
@@ -77,26 +94,9 @@ void touch_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
     // interpret that a click happened from a specific sequence of events
     data->point.x = x_pos;
     data->point.y = y_pos;
+
+    printk("Press at %u, %u\n", x_pos, y_pos);
   }
-}
-
-/*
-
-Touchscreen-specific I2C setup
-
-*/
-
-static const struct device* i2c_dev = DEVICE_DT_GET(ARDUINO_I2C_NODE); // Select an I2C "device" from the on-board peripheral
-
-// To send commands to and read responses from the I2C slave
-void touch_control_cmd_rsp(uint8_t cmd, uint8_t* rsp) {
-  struct i2c_msg cmd_rsp_msg[2] = {
-    [0] = {.buf=&cmd, .len=1, .flags=I2C_MSG_WRITE},
-    [1] = {.buf=rsp, .len=1, .flags=I2C_MSG_RESTART | I2C_MSG_READ | I2C_MSG_STOP}
-  };
-
-  // Send a command to and receive a response from the I2C slave 
-  i2c_transfer(i2c_dev, cmd_rsp_msg, 2, TD_ADDR);
 }
 
 int main(void) {
@@ -151,6 +151,12 @@ int main(void) {
 
   // "Turn on" the screen so we can actually see things on it
   display_blanking_off(display_dev);
+
+  // Set up LVGL so that the button press callback is called every SLEEP_MS period
+  // NOTE: "lv_indev" means "LVGL input device", and our input, a touchscreen is of type "pointer" (like a cursor)
+  lv_indev_t* indev = lv_indev_create();
+  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+  lv_indev_set_read_cb(indev, touch_read_cb);
 
   while (1) {
     // Check touches and refresh LCD every SLEEP_MS milliseconds
