@@ -49,7 +49,13 @@ Before we even begin to think about receiving data from the GATT client (the PC)
 
 Therefore, we should first implement the touchscreen and LCD functionality so that data, even mock data, can be displayed on the screen and manipulated which can verify proper communication between the GATT client and server down the line.
 
+### State Machines
+State machines will likely have to be used for navigating menus. Each state represents a different UI layout, and states change per button press (if the button being pressed is a navigational button). 
 
+States needed so far:
+- Main menu
+- Performance evaluation
+- Media controls
 
 
 
