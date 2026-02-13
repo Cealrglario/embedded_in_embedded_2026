@@ -1,3 +1,7 @@
+/**
+ * @file touchscreen_defines.h
+ */
+
 #ifndef TOUCHSCREEN_DEFINES_H
 #define TOUCHSCREEN_DEFINES_H
 

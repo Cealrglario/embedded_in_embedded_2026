@@ -11,6 +11,7 @@
 #include <lvgl.h>
 
 #include "touchscreen_defines.h"
+#include "state_machine.h"
 #include "BTN.h"
 #include "LED.h"
 #include "lv_data_obj.h"
@@ -133,6 +134,18 @@ int main(void) {
     printk("LEDs not yet ready.\n");
     return 0;
   }
+
+  // Initialize the state machine
+  state_machine_init();
+
+  if (0 > state_machine_run()) {
+    printk("State machine not yet ready.\n");
+    return 0;
+  }
+
+  /**
+   * The following "main menu" code should be put into its own main_menu state
+   */
 
   // We would initialize objects to display onto the LVGL screen here
   for (uint8_t i = 0; i < HOME_SCREEN_BUTTONS; i++) {
