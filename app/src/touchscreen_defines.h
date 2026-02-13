@@ -1,5 +1,7 @@
-#ifndef I2C_DEFINES_H
-#define I2C_DEFINES_H
+#ifndef TOUCHSCREEN_DEFINES_H
+#define TOUCHSCREEN_DEFINES_H
+
+#define SLEEP_MS 100
 
 // "Retrieve" the I2C peripheral from the device tree
 #define ARDUINO_I2C_NODE DT_NODELABEL(arduino_i2c)   
