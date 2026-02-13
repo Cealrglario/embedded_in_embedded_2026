@@ -19,6 +19,14 @@
         };
     };
 
+    zephyr,user {
+        dcx_gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>; // Specific to the LCD, the dc/x pin, when HIGH, indicates data being sent *TO* the LCD
+    };                                            // (active high, where active in this case means master-to-slave)
+
+    arduino_spi {
+        cs-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>; // SPI peripherals are active when the pin is pulled to LOW (active low)
+    };
+
     aliases {
         pwm-led0 = &pwm_led0;
         pwm-led1 = &pwm_led1;
