@@ -15,6 +15,18 @@
 
 /*
 
+LVGL setup
+
+*/
+
+// Retrieve the drivers for the LCD (ILI9341) from the Zephyr device tree
+static const struct device* display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
+
+// An LVGL object representing the LCD we will be displaying content onto
+static lv_obj_t* screen = NULL;
+
+/*
+
 Touchscreen-specific I2C setup
 
 */
@@ -33,7 +45,7 @@ void touch_control_cmd_rsp(uint8_t cmd, uint8_t* rsp) {
 }
 
 int main(void) {
-  // If the I2C peripehral is not yet ready
+  // If the I2C peripheral is not yet ready
   if(!device_is_ready(i2c_dev)) {
     printk("I2C device not yet ready.\n");
     return 0;
@@ -42,6 +54,19 @@ int main(void) {
   // Configure I2C device with 100KHz clock on Master mode
   if(0 > i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_STANDARD) | I2C_MODE_CONTROLLER)) {
     printk("Error while configuring I2C device.\n");
+  }
+
+  if(!device_is_ready(display_dev)) {
+    printk("LCD drivers not yet ready.\n");
+    return 0;
+  }
+
+  // If we get to this point, the LCD drivers are ready and we can initialize the LVGL screen object
+  screen = lv_screen_active();
+  
+  if (screen == NULL) {
+    printk("Failed to initialize LVGL screen.\n");
+    return 0;
   }
 
   if (0 > BTN_init()) {
@@ -53,6 +78,11 @@ int main(void) {
     printk("LEDs not yet ready.\n");
     return 0;
   }
+
+  // We would initialize objects to display onto the LVGL screen here
+
+  // "Turn on" the screen so we can actually see things on it
+  display_blanking_off(display_dev);
 
   while (1) {
     uint8_t touch_status;
@@ -76,7 +106,7 @@ int main(void) {
       printk("Touch at %u, %u\n", x_pos, y_pos);
     }
 
-    // Check touches every 100ms
+    // Check touches and refresh LCD every SLEEP_MS milliseconds
     k_msleep(SLEEP_MS);
   }
   return 0;
