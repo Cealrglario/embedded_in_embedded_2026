@@ -75,9 +75,9 @@ void touch_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
     touch_control_cmd_rsp(P1_YH, &y_pos_h);
     touch_control_cmd_rsp(P1_YL, &y_pos_l);
 
-    // Update the "last known" touch position
-    x_pos = ((x_pos_h & TOUCH_POS_MSB_MASK) << 8) + x_pos_l;
-    y_pos = ((y_pos_h & TOUCH_POS_MSB_MASK) << 8) + y_pos_l;
+    // Update the "last known" touch position, remember that coordinates are INVERTED on the LCD
+    y_pos = ((x_pos_h & TOUCH_POS_MSB_MASK) << 8) + x_pos_l;
+    x_pos = ((y_pos_h & TOUCH_POS_MSB_MASK) << 8) + y_pos_l;
 
     // Now that we know the x and y positions of a touch, send it to LVGL and report a touch
     data->point.x = x_pos;
