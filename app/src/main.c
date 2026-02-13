@@ -85,14 +85,74 @@ void touch_control_cmd_rsp(uint8_t cmd, uint8_t* rsp) {
 }
 
 int main(void) {
-  if (0 > BTN_init()) {
-    return 0;
-  }
-  if (0 > LED_init()) {
+  // If the SPI peripheral is not yet ready
+  if(!device_is_ready(spi_dev)) {
+    printk("SPI not yet ready.\n");
     return 0;
   }
 
+  // If the I2C peripehral is not yet ready
+  if(!device_is_ready(i2c_dev)) {
+    printk("I2C device not yet ready.\n");
+    return 0;
+  }
+
+  // Configure I2C device with 100KHz clock on Master mode
+  if(0 > i2c_configure(i2c_dev, I2C_SPEED_SET(I2C_SPEED_STANDARD) | I2C_MODE_CONTROLLER)) {
+    printk("Error while configuring I2C device.\n");
+  }
+
+  // If the dc/x GPIO is not yet ready
+  if(!gpio_is_ready_dt(&dcx_gpio)) {
+    printk("GPIO not yet ready.\n");
+    return 0;
+  }
+
+  if(gpio_pin_configure_dt(&dcx_gpio, GPIO_OUTPUT_LOW)) {
+    printk("Pin configuration not successful.\n");
+    return 0;
+  }
+
+  if (0 > BTN_init()) {
+    printk("Buttons not yet ready.\n");
+    return 0;
+  }
+
+  if (0 > LED_init()) {
+    printk("LEDs not yet ready.\n");
+    return 0;
+  }
+
+  // Reset the LCD state
+  lcd_cmd(CMD_SOFTWARE_RESET, NULL);
+  k_msleep(120);  // Software reset command can take up to 120 ms before any more commands can be sent
+
+  lcd_cmd(CMD_SLEEP_OUT, NULL);
+  lcd_cmd(CMD_DISPLAY_ON, NULL);
+
   while (1) {
+    uint8_t touch_status;
+    touch_control_cmd_rsp(TD_STATUS, &touch_status); // Get touchscreen status (is it ready?)
+
+    if (touch_status == 1) {
+      uint8_t x_pos_h;
+      uint8_t x_pos_l;
+      uint8_t y_pos_h;
+      uint8_t y_pos_l;
+      
+      touch_control_cmd_rsp(P1_XH, &x_pos_h);
+      touch_control_cmd_rsp(P1_XL, &x_pos_l);
+      touch_control_cmd_rsp(P1_YH, &y_pos_h);
+      touch_control_cmd_rsp(P1_YL, &y_pos_l);
+
+      // Build the full (presumably)  9-bit x and y position 
+      uint16_t x_pos = ((x_pos_h & TOUCH_POS_MSB_MASK) << 8) + x_pos_l;
+      uint16_t y_pos = ((y_pos_h & TOUCH_POS_MSB_MASK) << 8) + y_pos_l;
+
+      printk("Touch at %u, %u\n", x_pos, y_pos);
+    }
+
+    // Check touches every 100ms
     k_msleep(SLEEP_MS);
   }
   return 0;
