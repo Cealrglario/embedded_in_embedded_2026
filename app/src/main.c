@@ -27,6 +27,59 @@ static const struct device* display_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_display
 // An LVGL object representing the LCD we will be displaying content onto
 static lv_obj_t* screen = NULL;
 
+// To store the x and y position of a touch between checks
+// We want these to be static so that the last touch position is stored instead of being set to (0, 0) every call
+static uint16_t x_pos;
+static uint16_t y_pos;
+
+// LVGL callback that is called to check whether a button has been pressed
+void touch_read_cb(lv_indev_t* indev, lv_indev_data_t* data) {
+  /*
+  LOGICAL STEPS:
+  1. Read I2C touchscreen data
+  2. Check if a valid touch is detected...
+  3. Else if no touch is detected...
+  */
+
+  uint8_t touch_status;
+  touch_control_cmd_rsp(TD_STATUS, &touch_status); // Get touchscreen status (is it ready?)
+
+  // If screen is currently being held down
+  if (touch_status == 1) {
+    uint8_t x_pos_h;
+    uint8_t x_pos_l;
+    uint8_t y_pos_h;
+    uint8_t y_pos_l;
+    
+    touch_control_cmd_rsp(P1_XH, &x_pos_h);
+    touch_control_cmd_rsp(P1_XL, &x_pos_l);
+    touch_control_cmd_rsp(P1_YH, &y_pos_h);
+    touch_control_cmd_rsp(P1_YL, &y_pos_l);
+
+    // Update the "last known" touch position
+    x_pos = ((x_pos_h & TOUCH_POS_MSB_MASK) << 8) + x_pos_l;
+    y_pos = ((y_pos_h & TOUCH_POS_MSB_MASK) << 8) + y_pos_l;
+
+    // Now that we know the x and y positions of a touch, send it to LVGL and report a touch
+    data->point.x = x_pos;
+    data->point.y = y_pos;
+    data->state = LV_INDEV_STATE_PRESSED;
+
+    printk("Touch at %u, %u\n", x_pos, y_pos);
+  }
+  // If the screen isn't currently being touched (released)
+  else if (touch_status == 0) {
+    data->state = LV_INDEV_STATE_RELEASED;
+
+    // We want to continue to record the last location where a press occured (static variables)
+    // because LVGL inteprets a click as a sequence of press, hold, release all at the same x and y positions
+    // If we didn't have static variables, and they were set to garbage or (0, 0), LVGL wouldn't properly
+    // interpret that a click happened from a specific sequence of events
+    data->point.x = x_pos;
+    data->point.y = y_pos;
+  }
+}
+
 /*
 
 Touchscreen-specific I2C setup
@@ -100,27 +153,6 @@ int main(void) {
   display_blanking_off(display_dev);
 
   while (1) {
-    uint8_t touch_status;
-    touch_control_cmd_rsp(TD_STATUS, &touch_status); // Get touchscreen status (is it ready?)
-
-    if (touch_status == 1) {
-      uint8_t x_pos_h;
-      uint8_t x_pos_l;
-      uint8_t y_pos_h;
-      uint8_t y_pos_l;
-      
-      touch_control_cmd_rsp(P1_XH, &x_pos_h);
-      touch_control_cmd_rsp(P1_XL, &x_pos_l);
-      touch_control_cmd_rsp(P1_YH, &y_pos_h);
-      touch_control_cmd_rsp(P1_YL, &y_pos_l);
-
-      // Build the full (presumably)  9-bit x and y position 
-      uint16_t x_pos = ((x_pos_h & TOUCH_POS_MSB_MASK) << 8) + x_pos_l;
-      uint16_t y_pos = ((y_pos_h & TOUCH_POS_MSB_MASK) << 8) + y_pos_l;
-
-      printk("Touch at %u, %u\n", x_pos, y_pos);
-    }
-
     // Check touches and refresh LCD every SLEEP_MS milliseconds
     lv_timer_handler();
     k_msleep(SLEEP_MS);
