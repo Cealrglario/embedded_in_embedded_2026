@@ -6,7 +6,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/i2c.h>
-#include <zephyr/sys/printk.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/sys/printk.h> 
+#include <lvgl.h>
 
 #include "touchscreen_defines.h"
 #include "BTN.h"
@@ -80,6 +82,19 @@ int main(void) {
   }
 
   // We would initialize objects to display onto the LVGL screen here
+  for (uint8_t i = 0; i < HOME_SCREEN_BUTTONS; i++) {
+    lv_obj_t* ui_btn = lv_button_create(screen); // Add a button to the screen
+
+    // Place the buttons in the center of the screen
+    lv_obj_align(ui_btn, LV_ALIGN_CENTER, 0, VERTICAL_SPACING_MULTIPLIER * (i % 2 ? 1 : -1));
+
+    // Add text to the button
+    lv_obj_t* button_label = lv_label_create(ui_btn); 
+    char label_text[BUTTON_TEXT_MAX_LENGTH];
+    snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Media Controls");
+    lv_label_set_text(button_label, label_text);
+    lv_obj_align(button_label, LV_ALIGN_CENTER, 0, 0);
+  }
 
   // "Turn on" the screen so we can actually see things on it
   display_blanking_off(display_dev);
@@ -107,6 +122,7 @@ int main(void) {
     }
 
     // Check touches and refresh LCD every SLEEP_MS milliseconds
+    lv_timer_handler();
     k_msleep(SLEEP_MS);
   }
   return 0;
