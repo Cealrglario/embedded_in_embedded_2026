@@ -61,6 +61,9 @@ static const struct smf_state ui_states[] = {
     [MEDIA_CONTROLS] = SMF_CREATE_STATE(media_controls_on_state_entry, media_controls_on_state_run, NULL, NULL, NULL)
 };
 
+// Indicates the next state to transition to
+static enum ui_state_machine_states next_state = -1; // -1 indicates no state change request
+
 void state_machine_init() {
     // Set initial state to be the main menu
     smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
@@ -98,7 +101,14 @@ static void main_menu_on_state_entry(void* o) {
 static enum smf_state_result main_menu_on_state_run(void* o) {
     lv_timer_handler();
     
-    // We would add logic here to traverse menus based on button clicks
+    if (next_state == PERFORMANCE_METRICS) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
+    }
+    else if (next_state == MEDIA_CONTROLS) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MEDIA_CONTROLS]);
+    }
 
     return SMF_EVENT_HANDLED;
 }
@@ -114,7 +124,14 @@ static void performance_metrics_on_state_entry(void* o) {
 static enum smf_state_result performance_metrics_on_state_run(void* o) {
     lv_timer_handler();
     
-    // We would add logic here to traverse menus based on button clicks
+    if (next_state == MAIN_MENU) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
+    }
+    else if (next_state == MEDIA_CONTROLS) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MEDIA_CONTROLS]);
+    }
 
     return SMF_EVENT_HANDLED;
 }
@@ -130,7 +147,14 @@ static void media_controls_on_state_entry(void* o) {
 static enum smf_state_result media_controls_on_state_run(void* o) {
     lv_timer_handler();
     
-    // We would add logic here to traverse menus based on button clicks
+    if (next_state == MAIN_MENU) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
+    }
+    else if (next_state == PERFORMANCE_METRICS) {
+        next_state = -1; // Clear the next state flag since we're now handling the transition
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
+    }
 
     return SMF_EVENT_HANDLED;
 }
