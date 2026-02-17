@@ -36,6 +36,14 @@ Bluetooth:
 Touchscreen:
 - Provide toggles to view different PC metrics and information, and provide options to modify music being played on the PC, if applicable.
 
+State Machines:
+State machines will be used for navigating menus. Each state represents a different UI layout, and states change per button press (if the button being pressed is a navigational button). 
+
+States needed so far:
+- Main menu
+- Performance metrics
+- Media controls
+
 ## Initial Design Plan
 The BLE *central* should be the PC running a (likely Python) script sending metrics to the nRF52840.
 The BLE *peripheral* should be the nRF52840.
@@ -44,18 +52,25 @@ In this case, the peripheral acts as a "bulletin board", a GATT server, that can
 
 In terms of implementing media play/pause (where the nRF52840 can act like a remote control for media playing on a PC running a Python script), the GATT client can *subscribe* to notifications from the GATT server. In this case, "notifications" will actually be instructions from the nRF52840 *to the PC* to perform media instructions.
 
-### 1. Develop a working "debugging" interface
+### Stage 1. Develop a working, barebones visual interface
 Before we even begin to think about receiving data from the GATT client (the PC), we need a way to visualize it so, down the line, we can confirm that data is actually being received properly.
 
 Therefore, we should first implement the touchscreen and LCD functionality so that data, even mock data, can be displayed on the screen and manipulated which can verify proper communication between the GATT client and server down the line.
 
-### State Machines
-State machines will likely have to be used for navigating menus. Each state represents a different UI layout, and states change per button press (if the button being pressed is a navigational button). 
+### To do for stage 1:
+- Finish state machine code (user interface layout and design) for media controls and performance metrics menu
+- Add logic that checks for button presses and traverses the state machine accordingly
 
-States needed so far:
-- Main menu
-- Performance evaluation
-- Media controls
+### Stage 2. Develop the bluetooth peripheral (our nRF52840, GATT server) architecture
 
+### Stage 3. Develop the bluetooth central (PC running a Python script, GATT client) architecture
+
+### Stage 4. Unify the bluetooth GATT server and client and achieve communication
+
+### Stage 5. Display performance metrics on the nRF52840 and implement toggleable metrics
+
+### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC
+
+### Stage 7. Refinements, bug fixes, small extra functionalities???
 
 
