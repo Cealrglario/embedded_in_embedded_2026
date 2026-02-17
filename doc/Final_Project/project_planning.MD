@@ -59,22 +59,30 @@ Therefore, we should first implement the touchscreen and LCD functionality so th
 
 #### Performance Metrics Page Layout:
 
-Screen (Parent)
- ├── Top_Container (Height: 40%, Flex Flow: ROW_WRAP)
- │    ├── Label_CPU_Clock (Width: 50%)
- │    ├── Label_CPU_Power_Usage (Width: 50%)
- │    ├── Label_CPU_Temperature (Width: 50%)
- │    ├── Label_GPU_Temperature (Width: 50%)
- │    └── Label_Network_Upload (Width: 50%)
- │    └── Label_Network_Download (Width: 50%)
- │
- └── Bottom_Container (Height: 60%, Flex Flow: COLUMN)
-      ├── Label_CPU_Usage_Title
-      ├── Bar_CPU_Usage
-      ├── Label_GPU_Usage_Title
-      ├── Bar_GPU_Usage
-      ├── Label_RAM_Usage_Title
-      └── Bar_RAM_Usage
+graph TD
+    Screen[Screen Parent]
+    
+    %% Top Container
+    Screen --> Top[Top_Container<br/>H: 40%, Flex: ROW_WRAP]
+    Top --> L1[Label: CPU Clock]
+    Top --> L2[Label: CPU Power]
+    Top --> L3[Label: CPU Temp]
+    Top --> L4[Label: GPU Temp]
+    Top --> L5[Label: Net Upload]
+    Top --> L6[Label: Net Download]
+
+    %% Bottom Container
+    Screen --> Bot[Bottom_Container<br/>H: 60%, Flex: COLUMN]
+    Bot --> T1[Label: CPU Title]
+    Bot --> B1[Bar: CPU Usage]
+    Bot --> T2[Label: GPU Title]
+    Bot --> B2[Bar: GPU Usage]
+    Bot --> T3[Label: RAM Title]
+    Bot --> B3[Bar: RAM Usage]
+    
+    %% Styling
+    style Top fill:#e1f5fe,stroke:#01579b
+    style Bot fill:#fff3e0,stroke:#e65100
 
 #### Media Controls Page Layout:
 
