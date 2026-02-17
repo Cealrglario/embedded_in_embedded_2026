@@ -57,32 +57,30 @@ Before we even begin to think about receiving data from the GATT client (the PC)
 
 Therefore, we should first implement the touchscreen and LCD functionality so that data, even mock data, can be displayed on the screen and manipulated which can verify proper communication between the GATT client and server down the line.
 
-#### Performance Metrics Page Layout:
+#### Performance Metrics UI Layout
 
-graph TD
-    Screen[Screen Parent]
-    
-    %% Top Container
-    Screen --> Top[Top_Container<br/>H: 40%, Flex: ROW_WRAP]
-    Top --> L1[Label: CPU Clock]
-    Top --> L2[Label: CPU Power]
-    Top --> L3[Label: CPU Temp]
-    Top --> L4[Label: GPU Temp]
-    Top --> L5[Label: Net Upload]
-    Top --> L6[Label: Net Download]
+The screen is divided into two primary containers to organize the data density effectively.
 
-    %% Bottom Container
-    Screen --> Bot[Bottom_Container<br/>H: 60%, Flex: COLUMN]
-    Bot --> T1[Label: CPU Title]
-    Bot --> B1[Bar: CPU Usage]
-    Bot --> T2[Label: GPU Title]
-    Bot --> B2[Bar: GPU Usage]
-    Bot --> T3[Label: RAM Title]
-    Bot --> B3[Bar: RAM Usage]
-    
-    %% Styling
-    style Top fill:#e1f5fe,stroke:#01579b
-    style Bot fill:#fff3e0,stroke:#e65100
+**1. Top Container (40% Height, Flex-Wrap Row)**
+*Used for scalar values that do not require progress bars.*
+* [Label] CPU Clock: x.x GHz
+* [Label] CPU Power: xx W
+* [Label] CPU Temp: xx °C
+* [Label] GPU Temp: xx °C
+* [Label] Net Upload: xx Mbps
+* [Label] Net Download: xx Mbps
+
+**2. Bottom Container (60% Height, Column)**
+*Used for percentage-based metrics requiring visual bars.*
+* **CPU Usage**
+    * [Label] Title: "CPU Usage"
+    * [Bar] Range: 0-100%
+* **GPU Usage**
+    * [Label] Title: "GPU Usage"
+    * [Bar] Range: 0-100%
+* **RAM Usage**
+    * [Label] Title: "RAM Usage"
+    * [Bar] Range: 0-100%
 
 #### Media Controls Page Layout:
 
