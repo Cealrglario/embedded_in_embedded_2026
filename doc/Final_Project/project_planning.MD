@@ -57,6 +57,29 @@ Before we even begin to think about receiving data from the GATT client (the PC)
 
 Therefore, we should first implement the touchscreen and LCD functionality so that data, even mock data, can be displayed on the screen and manipulated which can verify proper communication between the GATT client and server down the line.
 
+#### Performance Metrics Page Layout:
+
+Screen (Parent)
+ ├── Top_Container (Height: 40%, Flex Flow: ROW_WRAP)
+ │    ├── Label_CPU_Clock (Width: 50%)
+ │    ├── Label_CPU_Power_Usage (Width: 50%)
+ │    ├── Label_CPU_Temperature (Width: 50%)
+ │    ├── Label_GPU_Temperature (Width: 50%)
+ │    └── Label_Network_Upload (Width: 50%)
+ │    └── Label_Network_Download (Width: 50%)
+ │
+ └── Bottom_Container (Height: 60%, Flex Flow: COLUMN)
+      ├── Label_CPU_Usage_Title
+      ├── Bar_CPU_Usage
+      ├── Label_GPU_Usage_Title
+      ├── Bar_GPU_Usage
+      ├── Label_RAM_Usage_Title
+      └── Bar_RAM_Usage
+
+#### Media Controls Page Layout:
+
+???
+
 ### To do for stage 1:
 - Finish state machine code (user interface layout and design) for media controls and performance metrics menu
 - Add logic that checks for button presses and traverses the state machine accordingly
