@@ -224,7 +224,7 @@ static void performance_metrics_on_state_entry(void* o) {
     lv_bar_set_range(perf_metrics_ui.bar_gpu_usage, 0, 100);
 
     lv_obj_t* ram_usage_title = lv_label_create(perf_bottom_container);
-    lv_label_set_text(ram_usage_title, "RAM Usage (GB):"); // We will only be updating the percentage bar, not the bar title,
+    lv_label_set_text(ram_usage_title, "RAM Usage (%):"); // We will only be updating the percentage bar, not the bar title,
                                                                 // so this doesn't have to be stored in our static struct
                                                                 
     // Dynamic RAM usage percentage bar (store in static struct for future updates)
