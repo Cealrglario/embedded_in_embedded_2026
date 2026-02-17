@@ -67,10 +67,12 @@ Therefore, we should first implement the touchscreen and LCD functionality so th
 
 ### Stage 4. Unify the bluetooth GATT server and client and achieve communication
 
-### Stage 5. Display performance metrics on the nRF52840 and implement toggleable metrics
+### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics)
 
 ### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC
 
-### Stage 7. Refinements, bug fixes, small extra functionalities???
+### Stage 7. Implement toggleable metrics (can show different metrics on screen)
+
+### Stage 8. Refinements, bug fixes, small extra functionalities???
 
 
