@@ -11,6 +11,43 @@
 #include "lv_data_obj.h"
 
 /**
+ * Function prototypes
+ * 
+ * (Declare any functions here that are only to be used within this source file and nowhere else)
+ */
+
+// Main menu
+static void main_menu_on_state_entry(void* o);
+static enum smf_state_result main_menu_on_state_run(void* o);
+
+// Performance metrics page
+static void performance_metrics_on_state_entry(void* o);
+static enum smf_state_result performance_metrics_on_state_run(void* o);
+
+// Media controls page
+static void media_controls_on_state_entry(void* o);
+static enum smf_state_result media_controls_on_state_run(void* o);
+
+/**
+ * Typedefs
+ */
+
+enum ui_state_machine_states {
+    MAIN_MENU,
+    PERFORMANCE_METRICS,
+    MEDIA_CONTROLS
+};
+
+// Object that Zephyr uses to keep track of current state (this is what is constantly ran inside the super loop)
+typedef struct {
+    // Context variable used by Zephyr to track state machine state, must be declared first
+    struct smf_ctx ctx;
+
+    // Other variables that can help in keeping track of proper state should be added here
+
+} ui_state_object_t;
+
+/**
  * Local variables
  */
 
@@ -54,7 +91,7 @@ static enum ui_state_machine_states next_state = -1; // -1 indicates no state ch
 
 void state_machine_init() {
     // Set initial state to be the main menu
-    smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
+    smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
 }
 
 int state_machine_run() {
@@ -132,6 +169,9 @@ static void performance_metrics_on_state_entry(void* o) {
     lv_obj_set_flex_align(perf_top_container, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER);
 
+    // Anchor this to the TOP of the screen so it actually appears on top
+    lv_obj_align(perf_top_container, LV_ALIGN_TOP_MID, 0, 0);
+
     // Create labels, add to our static metrics struct so that we can update them with new data (via bluetooth) later.
     // These labels should be children of the container so they are contained within them.
     perf_metrics_ui.label_cpu_clock = lv_label_create(perf_top_container);
@@ -161,6 +201,9 @@ static void performance_metrics_on_state_entry(void* o) {
     lv_obj_set_flex_flow(perf_bottom_container, LV_FLEX_FLOW_COLUMN); // Display bars nearly top-to-bottom in a vertical stack
     lv_obj_set_flex_align(perf_bottom_container, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER,
          LV_FLEX_ALIGN_CENTER);
+
+    // Anchor this to the BOTTOM of the screen so it actually appears on the bottom
+    lv_obj_align(perf_bottom_container, LV_ALIGN_BOTTOM_MID, 0, 0);
 
     lv_obj_t* cpu_usage_title = lv_label_create(perf_bottom_container);
     lv_label_set_text(cpu_usage_title, "CPU Usage (%):"); // We will only be updating the percentage bar, not the bar title,
