@@ -28,6 +28,9 @@ static enum smf_state_result performance_metrics_on_state_run(void* o);
 static void media_controls_on_state_entry(void* o);
 static enum smf_state_result media_controls_on_state_run(void* o);
 
+// Button press menu transition callback
+void lv_change_menu_cb(lv_event_t* event);
+
 /**
  * Typedefs
  */
@@ -89,6 +92,11 @@ static const struct smf_state ui_states[] = {
 // Indicates the next state to transition to
 static enum ui_state_machine_states next_state = -1; // -1 indicates no state change request
 
+// Objects that hold the enum value of states that can be transitioned to for button callback pointers
+static enum ui_state_machine_states perf_metrics_state = PERFORMANCE_METRICS;
+static enum ui_state_machine_states media_controls_state = MEDIA_CONTROLS;
+static enum ui_state_machine_states main_menu_state = MAIN_MENU;
+
 void state_machine_init() {
     // Set initial state to be the main menu
     smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
@@ -97,6 +105,16 @@ void state_machine_init() {
 int state_machine_run() {
     // When we run the state machine, we just want to return the state currently held in the ui_state_object
     return smf_run_state(SMF_CTX(&ui_state_object));
+}
+
+// Definition of button press menu transition callback
+void lv_change_menu_cb(lv_event_t* event) {
+    // Retrieve the next state data from the associated button
+    lv_obj_t* transition_state_obj = (lv_obj_t*) lv_event_get_user_data(event);
+    enum ui_state_machine_states transition_state_data = *(enum ui_state_machine_states*) lv_data_obj_get_data_ptr(transition_state_obj);
+
+    // Transition to the next state
+    next_state = transition_state_data;
 }
 
 /**
@@ -131,15 +149,27 @@ static void main_menu_on_state_entry(void* o) {
     // We want the buttons to be directly in the center of the screen
     lv_obj_set_align(button_container, LV_ALIGN_CENTER);
     
-    // Create the Performance Metrics navigation button
+    // Create the Performance Metrics navigation button and associate the state
     lv_obj_t* perf_metrics_button = lv_button_create(button_container);
     lv_obj_t* perf_metrics_text = lv_label_create(perf_metrics_button); // add the button text
     lv_label_set_text(perf_metrics_text, "Performance Metrics");
+    
+    // Data to send to the menu change callback when the button is clicked
+    lv_obj_t* perf_state = lv_data_obj_create_alloc_assign(perf_metrics_button, &perf_metrics_state, sizeof(PERFORMANCE_METRICS));
 
-    // Create the Media Controls button
+    // When the Performance Metrics button is clicked, we want to transition to that state/menu
+    lv_obj_add_event_cb(perf_metrics_button, lv_change_menu_cb, LV_EVENT_CLICKED, perf_state);
+
+    // Create the Media Controls button and associate the state
     lv_obj_t* media_controls_button = lv_button_create(button_container);
     lv_obj_t* media_controls_text = lv_label_create(media_controls_button); // add the button text
     lv_label_set_text(media_controls_text, "Media Controls");
+
+    // Data to send to the menu change callback when the button is clicked
+    lv_obj_t* media_state = lv_data_obj_create_alloc_assign(media_controls_button, &media_controls_state, sizeof(MEDIA_CONTROLS));
+
+    // When the Media Controls button is clicked, we want to transition to that state/menu
+    lv_obj_add_event_cb(media_controls_button, lv_change_menu_cb, LV_EVENT_CLICKED, media_state);
 }
 
 static enum smf_state_result main_menu_on_state_run(void* o) {
