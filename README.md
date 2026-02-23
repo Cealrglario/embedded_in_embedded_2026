@@ -1,5 +1,5 @@
 # Main Repository
-This repository will be used for the development of a final project to complete the EiE program for its 2025-2026 run. Exact project details are, as of yet, unknown, as I have yet to choose a project to work on, but this branch will be updated more and more with precise project details and planning documents as time goes on.
+This repository is currently being used for the development of a final project to complete the EiE program for its 2025-2026 run. The project aims to turn the nRF52840 development board into a hardware monitor "sidecar" which displays real-time hardware performance metrics (such as CPU usage, CPU core clocks, temperatures, etc.) from a PC connected over bluetooth onto an LCD attached to the nRF52840. Down the line, functionality will also be added to the "sidecar" that allows it to act as a media control device for the connected PC which allows a user to play, pause, skip and change the volume of a song or video currently playing on the PC.
 
 # EiE Program Details
 ## Embedded In Embedded w/ nRF52840
