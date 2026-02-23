@@ -91,7 +91,7 @@ static enum ui_state_machine_states next_state = -1; // -1 indicates no state ch
 
 void state_machine_init() {
     // Set initial state to be the main menu
-    smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
+    smf_set_initial(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
 }
 
 int state_machine_run() {
@@ -108,19 +108,38 @@ static void main_menu_on_state_entry(void* o) {
     lv_obj_clean(screen);
 
     // We would initialize objects to display onto the LVGL screen here
-    for (uint8_t i = 0; i < HOME_SCREEN_BUTTONS; i++) {
-        lv_obj_t* ui_btn = lv_button_create(screen); // Add a button to the screen
+    // for (uint8_t i = 0; i < HOME_SCREEN_BUTTONS; i++) {
+    //     lv_obj_t* ui_btn = lv_button_create(screen); // Add a button to the screen
 
-        // Place the buttons in the center of the screen
-        lv_obj_align(ui_btn, LV_ALIGN_CENTER, 0, VERTICAL_SPACING_MULTIPLIER * (i % 2 ? 1 : -1));
+    //     // Place the buttons in the center of the screen
+    //     lv_obj_align(ui_btn, LV_ALIGN_CENTER, 0, VERTICAL_SPACING_MULTIPLIER * (i % 2 ? 1 : -1));
 
-        // Add text to the button
-        lv_obj_t* button_label = lv_label_create(ui_btn); 
-        char label_text[BUTTON_TEXT_MAX_LENGTH];
-        snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Media Controls");
-        lv_label_set_text(button_label, label_text);
-        lv_obj_align(button_label, LV_ALIGN_CENTER, 0, 0);
-    }
+    //     // Add text to the button
+    //     lv_obj_t* button_label = lv_label_create(ui_btn); 
+    //     char label_text[BUTTON_TEXT_MAX_LENGTH];
+    //     snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Media Controls");
+    //     lv_label_set_text(button_label, label_text);
+    //     lv_obj_align(button_label, LV_ALIGN_CENTER, 0, 0);
+    // }
+
+    lv_obj_t* button_container = lv_obj_create(screen);
+    lv_obj_set_size(button_container, lv_pct(100), lv_pct(100));
+    lv_obj_set_flex_flow(button_container, LV_FLEX_FLOW_COLUMN); // Display objects neatly top-to-bottom with flex
+    lv_obj_set_flex_align(button_container, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER);
+
+    // We want the buttons to be directly in the center of the screen
+    lv_obj_set_align(button_container, LV_ALIGN_CENTER);
+    
+    // Create the Performance Metrics navigation button
+    lv_obj_t* perf_metrics_button = lv_button_create(button_container);
+    lv_obj_t* perf_metrics_text = lv_label_create(perf_metrics_button); // add the button text
+    lv_label_set_text(perf_metrics_text, "Performance Metrics");
+
+    // Create the Media Controls button
+    lv_obj_t* media_controls_button = lv_button_create(button_container);
+    lv_obj_t* media_controls_text = lv_label_create(media_controls_button); // add the button text
+    lv_label_set_text(media_controls_text, "Media Controls");
 }
 
 static enum smf_state_result main_menu_on_state_run(void* o) {
