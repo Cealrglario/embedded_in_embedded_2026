@@ -4,11 +4,13 @@
 
 #include <zephyr/smf.h>
 #include <zephyr/drivers/display.h>
+#include <zephyr/drivers/gpio.h>
 #include <lvgl.h>
 
 #include "state_machine.h"
 #include "touchscreen_defines.h"
 #include "lv_data_obj.h"
+#include "BTN.h"
 
 /**
  * Function prototypes
@@ -54,6 +56,9 @@ typedef struct {
  * Local variables
  */
 
+// Struct representing the menu "back" button
+static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(SW0_NODE, gpios);
+
 // Static struct that holds the current state to run during runtime
 static ui_state_object_t ui_state_object;
 
@@ -95,7 +100,6 @@ static enum ui_state_machine_states next_state = -1; // -1 indicates no state ch
 // Objects that hold the enum value of states that can be transitioned to for button callback pointers
 static enum ui_state_machine_states perf_metrics_state = PERFORMANCE_METRICS;
 static enum ui_state_machine_states media_controls_state = MEDIA_CONTROLS;
-static enum ui_state_machine_states main_menu_state = MAIN_MENU;
 
 void state_machine_init() {
     // Set initial state to be the main menu
@@ -160,16 +164,16 @@ static void main_menu_on_state_entry(void* o) {
     // When the Performance Metrics button is clicked, we want to transition to that state/menu
     lv_obj_add_event_cb(perf_metrics_button, lv_change_menu_cb, LV_EVENT_CLICKED, perf_state);
 
-    // Create the Media Controls button and associate the state
-    lv_obj_t* media_controls_button = lv_button_create(button_container);
-    lv_obj_t* media_controls_text = lv_label_create(media_controls_button); // add the button text
-    lv_label_set_text(media_controls_text, "Media Controls");
+    // // Create the Media Controls button and associate the state
+    // lv_obj_t* media_controls_button = lv_button_create(button_container);
+    // lv_obj_t* media_controls_text = lv_label_create(media_controls_button); // add the button text
+    // lv_label_set_text(media_controls_text, "Media Controls");
 
-    // Data to send to the menu change callback when the button is clicked
-    lv_obj_t* media_state = lv_data_obj_create_alloc_assign(media_controls_button, &media_controls_state, sizeof(MEDIA_CONTROLS));
+    // // Data to send to the menu change callback when the button is clicked
+    // lv_obj_t* media_state = lv_data_obj_create_alloc_assign(media_controls_button, &media_controls_state, sizeof(MEDIA_CONTROLS));
 
-    // When the Media Controls button is clicked, we want to transition to that state/menu
-    lv_obj_add_event_cb(media_controls_button, lv_change_menu_cb, LV_EVENT_CLICKED, media_state);
+    // // When the Media Controls button is clicked, we want to transition to that state/menu
+    // lv_obj_add_event_cb(media_controls_button, lv_change_menu_cb, LV_EVENT_CLICKED, media_state);
 }
 
 static enum smf_state_result main_menu_on_state_run(void* o) {
@@ -207,6 +211,12 @@ static void performance_metrics_on_state_entry(void* o) {
      * throughout runtime since these hold actual data unlike other LVGL components which are essentially purely visual.
      * These metrics will be "fed" to the visual LVGL components to display metrics on our LCD.
      */
+
+    /**
+     * "Back" button initialization
+     */
+
+    
 
     /**
      * Top container initialization (scalar metrics)
@@ -286,13 +296,9 @@ static void performance_metrics_on_state_entry(void* o) {
 static enum smf_state_result performance_metrics_on_state_run(void* o) {
     lv_timer_handler();
     
-    if (next_state == MAIN_MENU) {
-        next_state = -1; // Clear the next state flag since we're now handling the transition
+    if (gpio_pin_get_dt(&button)) {
+        // Go back to the main menu
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
-    }
-    else if (next_state == MEDIA_CONTROLS) {
-        next_state = -1; // Clear the next state flag since we're now handling the transition
-        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MEDIA_CONTROLS]);
     }
 
     return SMF_EVENT_HANDLED;
@@ -323,13 +329,9 @@ static void media_controls_on_state_entry(void* o) {
 static enum smf_state_result media_controls_on_state_run(void* o) {
     lv_timer_handler();
     
-    if (next_state == MAIN_MENU) {
-        next_state = -1; // Clear the next state flag since we're now handling the transition
+    if (gpio_pin_get_dt(&button)) {
+        // Go back to the main menu
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
-    }
-    else if (next_state == PERFORMANCE_METRICS) {
-        next_state = -1; // Clear the next state flag since we're now handling the transition
-        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
     }
 
     return SMF_EVENT_HANDLED;

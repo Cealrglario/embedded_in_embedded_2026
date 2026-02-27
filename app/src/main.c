@@ -1,4 +1,4 @@
-/**
+/** 
  * @file main.c
  */
 
@@ -147,9 +147,9 @@ int main(void) {
 
   // Set up LVGL so that the button press callback is called every SLEEP_MS period
   // NOTE: "lv_indev" means "LVGL input device", and our input, a touchscreen is of type "pointer" (like a cursor)
-  lv_indev_t* indev = lv_indev_create();
-  lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-  lv_indev_set_read_cb(indev, touch_read_cb);
+  // lv_indev_t* indev = lv_indev_create();
+  // lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+  // lv_indev_set_read_cb(indev, touch_read_cb);
 
   /**
    * Run the state machine
