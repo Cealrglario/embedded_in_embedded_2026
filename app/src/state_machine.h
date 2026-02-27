@@ -17,6 +17,7 @@
 #include "touchscreen_defines.h"
 #include "lv_data_obj.h"
 #include "BTN.h"
+#include "ble_peripheral.h"
 
 /**
  * Function prototypes

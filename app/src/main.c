@@ -17,6 +17,15 @@
 #include "LED.h"
 #include "lv_data_obj.h"
 
+/**
+ * Local variables
+ */
+
+extern ble_advertising_data;
+extern ble_scan_response_data;
+int err;
+
+
 /*
 
 Touchscreen-specific I2C setup
@@ -133,13 +142,33 @@ int main(void) {
   // "Turn on" the screen so we can actually see things on it
   display_blanking_off(display_dev);
 
+  // Initialize buttons
   if (0 > BTN_init()) {
     printk("Buttons not yet ready.\n");
     return 0;
   }
 
+  // Initialize LEDs
   if (0 > LED_init()) {
     printk("LEDs not yet ready.\n");
+    return 0;
+  }
+  
+  // Enable BLE
+  err = bt_enable(NULL);
+  if (err) {
+    printk("Bluetooth init failed (err %d)\n", err);
+    return 0;
+  } else {
+    printk("Bluetooth initialized!\n");
+  }
+
+  // Start BLE advertising
+  err =
+      bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ble_advertising_data, ARRAY_SIZE(ble_advertising_data),
+                      ble_scan_response_data, ARRAY_SIZE(ble_scan_response_data));
+  if (err) {
+    printk("Advertising failed to start (err %d)\n", err);
     return 0;
   }
 
@@ -152,10 +181,7 @@ int main(void) {
   // lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
   // lv_indev_set_read_cb(indev, touch_read_cb);
 
-  /**
-   * Run the state machine
-   */
-
+  // Run the state machine
   while (1) {
     if (0 > state_machine_run()) {
       printk("Error occured while running state machine.\n");
