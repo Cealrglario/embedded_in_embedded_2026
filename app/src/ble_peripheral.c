@@ -30,6 +30,9 @@ const struct bt_data ble_scan_response_data[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, CONFIG_BT_DEVICE_NAME, sizeof(CONFIG_BT_DEVICE_NAME) - 1),
 };
 
+const size_t advertising_data_array_size = ARRAY_SIZE(ble_advertising_data);
+const size_t scan_response_data_array_size = ARRAY_SIZE(ble_scan_response_data);
+
 // Define arrays that store the data written to our characteristics
 static uint8_t ble_cpu_gpu_scalar_metrics_characteristic_data[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH] = {};
 static uint8_t ble_network_scalar_metrics_characteristic_data[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH] = {};
@@ -67,6 +70,7 @@ BT_GATT_SERVICE_DEFINE(
         &ble_cpu_gpu_scalar_metrics_characteristic_uuid.uuid, // Setting the characteristic UUID
         BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
         BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
         ble_cpu_gpu_scalar_metrics_write_cb, // Callback for when this characteristic is written to
         ble_cpu_gpu_scalar_metrics_characteristic_data // Initial data stored in this characteristic
         ),
@@ -76,6 +80,7 @@ BT_GATT_SERVICE_DEFINE(
         &ble_network_scalar_metrics_characteristic_uuid.uuid, // Setting the characteristic UUID
         BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
         BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
         ble_network_scalar_metrics_write_cb, // Callback for when this characteristic is written to
         ble_network_scalar_metrics_characteristic_data // Initial data stored in this characteristic
         ),
@@ -85,6 +90,7 @@ BT_GATT_SERVICE_DEFINE(
         &ble_cpu_gpu_ram_percentage_metrics_characteristic_uuid.uuid, // Setting the characteristic UUID
         BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
         BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
         ble_cpu_gpu_ram_percentage_metrics_write_cb, // Callback for when this characteristic is written to
         ble_cpu_gpu_ram_percentage_metrics_characteristic_data // Initial data stored in this characteristic
         ),

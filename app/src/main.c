@@ -21,8 +21,10 @@
  * Local variables
  */
 
-extern ble_advertising_data;
-extern ble_scan_response_data;
+extern struct bt_data ble_advertising_data[];
+extern struct bt_data ble_scan_response_data[];
+extern size_t advertising_data_array_size;
+extern size_t scan_response_data_array_size;
 int err;
 
 
@@ -165,8 +167,8 @@ int main(void) {
 
   // Start BLE advertising
   err =
-      bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ble_advertising_data, ARRAY_SIZE(ble_advertising_data),
-                      ble_scan_response_data, ARRAY_SIZE(ble_scan_response_data));
+      bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ble_advertising_data, advertising_data_array_size,
+                      ble_scan_response_data, scan_response_data_array_size);
   if (err) {
     printk("Advertising failed to start (err %d)\n", err);
     return 0;
