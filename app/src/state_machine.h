@@ -6,6 +6,19 @@
 #define STATE_MACHINE_H
 
 /**
+ * Includes
+ */
+
+#include <zephyr/smf.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/drivers/gpio.h>
+#include <lvgl.h>
+
+#include "touchscreen_defines.h"
+#include "lv_data_obj.h"
+#include "BTN.h"
+
+/**
  * Function prototypes
  * 
  * (Declare any functions here that will be used in main.c)

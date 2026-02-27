@@ -2,15 +2,7 @@
  * @file state_machine.c
  */
 
-#include <zephyr/smf.h>
-#include <zephyr/drivers/display.h>
-#include <zephyr/drivers/gpio.h>
-#include <lvgl.h>
-
 #include "state_machine.h"
-#include "touchscreen_defines.h"
-#include "lv_data_obj.h"
-#include "BTN.h"
 
 /**
  * Function prototypes

@@ -12,6 +12,7 @@
 
 #include "touchscreen_defines.h"
 #include "state_machine.h"
+#include "ble_peripheral.h"
 #include "BTN.h"
 #include "LED.h"
 #include "lv_data_obj.h"
