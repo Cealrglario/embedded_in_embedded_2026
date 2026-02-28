@@ -5,30 +5,11 @@
 #include "ble_peripheral.h"
 
 /**
- * Typedefs
- */
-
-typedef struct {
-    uint32_t cpu_clock_mhz; // LSB (start write)
-    uint32_t cpu_power_watts;
-    uint32_t cpu_temp_celsius;
-    uint32_t gpu_temp_celsius; // MSB (end write)
-} cpu_gpu_scalar_metrics_t;
-
-typedef struct {
-    uint32_t network_down_bits; // LSB (start write)
-    uint32_t network_up_bits; // MSB (end write)
-} network_scalar_metrics_t;
-
-typedef struct {
-    uint32_t cpu_usage_percent; // LSB (start write)
-    uint32_t gpu_usage_percent;
-    uint32_t ram_usage_gb; // MSB (end write)
-} cpu_gpu_ram_percentage_metrics_t;
-
-/**
  * Local variables
  */
+
+// Flag indicating whether or not there is new data for LVGL to re-draw onto the LCD
+bool new_data = false;
 
 static const struct bt_uuid_128 ble_hardware_monitor_service_uuid = BT_UUID_INIT_128(BLE_HARDWARE_MONITOR_SERVICE_UUID);
 
@@ -146,6 +127,9 @@ static ssize_t ble_cpu_gpu_scalar_metrics_write_cb(struct bt_conn* conn, const s
     memcpy(attr->user_data, buf, len);
     printk("Received CPU and GPU scalar metrics from GATT client.\n");
 
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
+
     return len;
 };
                                         
@@ -172,6 +156,9 @@ static ssize_t ble_network_scalar_metrics_write_cb(struct bt_conn* conn, const s
     memcpy(attr->user_data, buf, len);
     printk("Received network scalar metrics from GATT client.\n");
 
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
+
     return len;
 };
 
@@ -197,6 +184,9 @@ static ssize_t ble_cpu_gpu_ram_percentage_metrics_write_cb(struct bt_conn* conn,
     // directly into attr->user_data with one line of code which will store each metric into each struct attribute in Little-Endian order (LSB first)
     memcpy(attr->user_data, buf, len);
     printk("Received CPU, GPU and RAM percentage metrics from GATT client.\n");
+
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
      
     return len;
 };

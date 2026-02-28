@@ -34,5 +34,6 @@ int state_machine_run();
  */
 
 #define SW0_NODE DT_ALIAS(sw0) // device tree identifier for button 0 (physical button 1)
+#define SCALAR_METRIC_MAX_LENGTH 24
 
 #endif  

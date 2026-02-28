@@ -48,6 +48,14 @@ typedef struct {
  * Local variables
  */
 
+// Flag indicating whether or not there is new data for LVGL to re-draw onto the LCD
+extern bool new_data;
+
+// Structs that contain metrics incoming from a GATT client
+extern cpu_gpu_scalar_metrics_t ble_cpu_gpu_scalar_metrics_characteristic_data;
+extern network_scalar_metrics_t ble_network_scalar_metrics_characteristic_data;
+extern cpu_gpu_ram_percentage_metrics_t ble_cpu_gpu_ram_percentage_metrics_characteristic_data;
+
 // Struct representing the menu "back" button
 static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET(SW0_NODE, gpios);
 
@@ -205,12 +213,6 @@ static void performance_metrics_on_state_entry(void* o) {
      */
 
     /**
-     * "Back" button initialization
-     */
-
-    
-
-    /**
      * Top container initialization (scalar metrics)
      */
 
@@ -226,22 +228,22 @@ static void performance_metrics_on_state_entry(void* o) {
     // Create labels, add to our static metrics struct so that we can update them with new data (via bluetooth) later.
     // These labels should be children of the container so they are contained within them.
     perf_metrics_ui.label_cpu_clock = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_clock, "CPU Clock: --"); 
+    lv_label_set_text(perf_metrics_ui.label_cpu_clock, "CPU Clock (MHz): --"); 
 
     perf_metrics_ui.label_cpu_power = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_power, "CPU Power: --");
+    lv_label_set_text(perf_metrics_ui.label_cpu_power, "CPU Power (W): --");
 
     perf_metrics_ui.label_cpu_temp = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_temp, "CPU Temp: --");
+    lv_label_set_text(perf_metrics_ui.label_cpu_temp, "CPU Temp (C): --");
     
     perf_metrics_ui.label_gpu_temp = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_gpu_temp, "GPU Temp: --");
+    lv_label_set_text(perf_metrics_ui.label_gpu_temp, "GPU Temp (C): --");
 
     perf_metrics_ui.label_net_download = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_net_download, "Net Down: --");
+    lv_label_set_text(perf_metrics_ui.label_net_download, "Net Down (Mb/s): --");
 
     perf_metrics_ui.label_net_upload = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_net_upload, "Net Up: --");
+    lv_label_set_text(perf_metrics_ui.label_net_upload, "Net Up (Mb/s): --");
 
     /**
      * Bottom container initialization (percentage-based metrics)
@@ -292,9 +294,36 @@ static enum smf_state_result performance_metrics_on_state_run(void* o) {
         // Go back to the main menu
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
     }
-    else {
-        // Process incoming hardware metrics ONLY IF NEW DATA IS AVAILABLE (implement a flag signalling data is ready to be re-displayed)
-        
+    else if (new_data) {
+        // Acknowledge incoming hardware metrics ONLY IF NEW DATA IS AVAILABLE
+        new_data = false;
+
+        // Process incoming scalar metrics
+        char cpu_clock_text[SCALAR_METRIC_MAX_LENGTH];
+        char cpu_power_text[SCALAR_METRIC_MAX_LENGTH];
+        char cpu_temp_text[SCALAR_METRIC_MAX_LENGTH];
+        char gpu_temp_text[SCALAR_METRIC_MAX_LENGTH];
+        char network_down_text[SCALAR_METRIC_MAX_LENGTH];
+        char network_up_text[SCALAR_METRIC_MAX_LENGTH];
+
+        snprintf(cpu_clock_text, sizeof(cpu_clock_text), "CPU Clock (MHz): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_clock_mhz);
+        snprintf(cpu_power_text, sizeof(cpu_power_text), "CPU Power (W): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_power_watts);
+        snprintf(cpu_temp_text, sizeof(cpu_temp_text), "CPU Temp (C): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_temp_celsius);
+        snprintf(gpu_temp_text, sizeof(gpu_temp_text), "GPU Temp (C): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.gpu_temp_celsius);
+        snprintf(network_down_text, sizeof(network_down_text), "Net Down (Mb/s): %u", ble_network_scalar_metrics_characteristic_data.network_down_bits);
+        snprintf(network_up_text, sizeof(network_up_text), "Net Up (Mb/s): %u", ble_network_scalar_metrics_characteristic_data.network_up_bits);
+
+        lv_label_set_text(perf_metrics_ui.label_cpu_clock, cpu_clock_text); 
+        lv_label_set_text(perf_metrics_ui.label_cpu_power, cpu_power_text);
+        lv_label_set_text(perf_metrics_ui.label_cpu_temp, cpu_temp_text);
+        lv_label_set_text(perf_metrics_ui.label_gpu_temp, gpu_temp_text);
+        lv_label_set_text(perf_metrics_ui.label_net_download, network_down_text);
+        lv_label_set_text(perf_metrics_ui.label_net_upload, network_up_text);
+
+        // Process percentage metrics
+        lv_bar_set_value(perf_metrics_ui.bar_cpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.cpu_usage_percent, LV_ANIM_OFF);
+        lv_bar_set_value(perf_metrics_ui.bar_gpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.gpu_usage_percent, LV_ANIM_OFF);
+        lv_bar_set_value(perf_metrics_ui.bar_ram_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.ram_usage_gb, LV_ANIM_OFF);
     }
 
     return SMF_EVENT_HANDLED;

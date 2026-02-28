@@ -15,6 +15,27 @@
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/uuid.h>
 
+/**
+ * Typedefs
+ */
+
+typedef struct {
+    uint32_t cpu_clock_mhz; // LSB (start write)
+    uint32_t cpu_power_watts;
+    uint32_t cpu_temp_celsius;
+    uint32_t gpu_temp_celsius; // MSB (end write)
+} cpu_gpu_scalar_metrics_t;
+
+typedef struct {
+    uint32_t network_down_bits; // LSB (start write)
+    uint32_t network_up_bits; // MSB (end write)
+} network_scalar_metrics_t;
+
+typedef struct {
+    uint32_t cpu_usage_percent; // LSB (start write)
+    uint32_t gpu_usage_percent;
+    uint32_t ram_usage_gb; // MSB (end write)
+} cpu_gpu_ram_percentage_metrics_t;
 
 /**
  * Service and Characteristic Setup
