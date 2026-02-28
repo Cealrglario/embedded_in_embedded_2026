@@ -52,7 +52,7 @@ In this case, the peripheral acts as a "bulletin board", a GATT server, that can
 
 In terms of implementing media play/pause (where the nRF52840 can act like a remote control for media playing on a PC running a Python script), the GATT client can *subscribe* to notifications from the GATT server. In this case, "notifications" will actually be instructions from the nRF52840 *to the PC* to perform media instructions.
 
-### Stage 1. Develop a working, barebones visual interface
+### Stage 1. Develop a working, barebones visual interface (COMPLETED)
 Before we even begin to think about receiving data from the GATT client (the PC), we need a way to visualize it so, down the line, we can confirm that data is actually being received properly.
 
 Therefore, we should first implement the touchscreen and LCD functionality so that data, even mock data, can be displayed on the screen and manipulated which can verify proper communication between the GATT client and server down the line.
@@ -84,24 +84,20 @@ The screen is divided into two primary containers to organize the data density e
 
 #### Media Controls Page Layout:
 
-???
+??? (W.I.P. until performance metrics functionality is fully implemented)
 
-### To do for stage 1:
-- Finish state machine code (user interface layout and design) for media controls and performance metrics menu
-- Add logic that checks for button presses and traverses the state machine accordingly
+### Stage 2. Develop the bluetooth peripheral (our nRF52840, GATT server) architecture (IN-PROGRESS)
 
-### Stage 2. Develop the bluetooth peripheral (our nRF52840, GATT server) architecture
+### Stage 3. Develop the bluetooth central (PC running a Python script, GATT client) architecture (TO DO)
 
-### Stage 3. Develop the bluetooth central (PC running a Python script, GATT client) architecture
+### Stage 4. Unify the bluetooth GATT server and client and achieve communication (TO DO)
 
-### Stage 4. Unify the bluetooth GATT server and client and achieve communication
+### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics) (TO DO)
 
-### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics)
+### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC (TO DO)
 
-### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC
+### Stage 7. Implement toggleable metrics (can show different metrics on screen) (TO DO)
 
-### Stage 7. Implement toggleable metrics (can show different metrics on screen)
-
-### Stage 8. Refinements, bug fixes, small extra functionalities???
+### Stage 8. Refinements, bug fixes, small extra functionalities??? (TO DO)
 
 
