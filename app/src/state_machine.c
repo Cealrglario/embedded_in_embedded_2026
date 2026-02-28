@@ -292,6 +292,10 @@ static enum smf_state_result performance_metrics_on_state_run(void* o) {
         // Go back to the main menu
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
     }
+    else {
+        // Process incoming hardware metrics ONLY IF NEW DATA IS AVAILABLE (implement a flag signalling data is ready to be re-displayed)
+        
+    }
 
     return SMF_EVENT_HANDLED;
 }
