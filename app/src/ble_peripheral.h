@@ -34,7 +34,7 @@ typedef struct {
 typedef struct {
     uint32_t cpu_usage_percent; // LSB (start write)
     uint32_t gpu_usage_percent;
-    uint32_t ram_usage_gb; // MSB (end write)
+    uint32_t ram_usage_percent; // MSB (end write)
 } cpu_gpu_ram_percentage_metrics_t;
 
 /**

@@ -80,8 +80,11 @@ typedef struct {
     
     // Percentage-range metrics (bottom container)
     lv_obj_t* bar_cpu_usage;
+    lv_obj_t* cpu_usage_title;
     lv_obj_t* bar_gpu_usage;
+    lv_obj_t* gpu_usage_title;
     lv_obj_t* bar_ram_usage;
+    lv_obj_t* ram_usage_title;
 } perf_metrics_ui_t;
 
 // Static struct that ACTUALLY holds our performance metrics data that we're updated during runtime
@@ -228,22 +231,22 @@ static void performance_metrics_on_state_entry(void* o) {
     // Create labels, add to our static metrics struct so that we can update them with new data (via bluetooth) later.
     // These labels should be children of the container so they are contained within them.
     perf_metrics_ui.label_cpu_clock = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_clock, "CPU Clock (MHz): --"); 
+    lv_label_set_text(perf_metrics_ui.label_cpu_clock, "CPU Clock: -- MHz"); 
 
     perf_metrics_ui.label_cpu_power = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_power, "CPU Power (W): --");
+    lv_label_set_text(perf_metrics_ui.label_cpu_power, "CPU Power: -- W");
 
     perf_metrics_ui.label_cpu_temp = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_cpu_temp, "CPU Temp (C): --");
+    lv_label_set_text(perf_metrics_ui.label_cpu_temp, "CPU Temp: --°C");
     
     perf_metrics_ui.label_gpu_temp = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_gpu_temp, "GPU Temp (C): --");
+    lv_label_set_text(perf_metrics_ui.label_gpu_temp, "GPU Temp: --°C");
 
     perf_metrics_ui.label_net_download = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_net_download, "Net Down (Mb/s): --");
+    lv_label_set_text(perf_metrics_ui.label_net_download, "Net Down: -- Kb/s");
 
     perf_metrics_ui.label_net_upload = lv_label_create(perf_top_container);
-    lv_label_set_text(perf_metrics_ui.label_net_upload, "Net Up (Mb/s): --");
+    lv_label_set_text(perf_metrics_ui.label_net_upload, "Net Up: -- Kb/s");
 
     /**
      * Bottom container initialization (percentage-based metrics)
@@ -258,32 +261,29 @@ static void performance_metrics_on_state_entry(void* o) {
     // Anchor this to the BOTTOM of the screen so it actually appears on the bottom
     lv_obj_align(perf_bottom_container, LV_ALIGN_BOTTOM_MID, 0, 0);
 
-    lv_obj_t* cpu_usage_title = lv_label_create(perf_bottom_container);
-    lv_label_set_text(cpu_usage_title, "CPU Usage (%):"); // We will only be updating the percentage bar, not the bar title,
-                                                                // so this doesn't have to be stored in our static struct
+    perf_metrics_ui.cpu_usage_title = lv_label_create(perf_bottom_container);
+    lv_label_set_text(perf_metrics_ui.cpu_usage_title, "CPU Usage: --%");
 
     // Dynamic CPU usage percentage bar (store in static struct for future updates)
     perf_metrics_ui.bar_cpu_usage = lv_bar_create(perf_bottom_container);
     lv_obj_set_size(perf_metrics_ui.bar_cpu_usage, lv_pct(90), 20);
     lv_bar_set_range(perf_metrics_ui.bar_cpu_usage, 0, 100);
 
-    lv_obj_t* gpu_usage_title = lv_label_create(perf_bottom_container);
-    lv_label_set_text(gpu_usage_title, "GPU Usage (%):"); // We will only be updating the percentage bar, not the bar title,
-                                                                // so this doesn't have to be stored in our static struct
-                                                                
+    perf_metrics_ui.gpu_usage_title = lv_label_create(perf_bottom_container);
+    lv_label_set_text(perf_metrics_ui.gpu_usage_title, "GPU Usage: --%");
+
     // Dynamic GPU usage percentage bar (store in static struct for future updates)
     perf_metrics_ui.bar_gpu_usage = lv_bar_create(perf_bottom_container);
     lv_obj_set_size(perf_metrics_ui.bar_gpu_usage, lv_pct(90), 20);
     lv_bar_set_range(perf_metrics_ui.bar_gpu_usage, 0, 100);
 
-    lv_obj_t* ram_usage_title = lv_label_create(perf_bottom_container);
-    lv_label_set_text(ram_usage_title, "RAM Usage (%):"); // We will only be updating the percentage bar, not the bar title,
-                                                                // so this doesn't have to be stored in our static struct
-                                                                
+    perf_metrics_ui.ram_usage_title = lv_label_create(perf_bottom_container);
+    lv_label_set_text(perf_metrics_ui.ram_usage_title, "RAM Usage: --%");         
+
     // Dynamic RAM usage percentage bar (store in static struct for future updates)
     perf_metrics_ui.bar_ram_usage = lv_bar_create(perf_bottom_container);
     lv_obj_set_size(perf_metrics_ui.bar_ram_usage, lv_pct(90), 20);
-    lv_bar_set_range(perf_metrics_ui.bar_ram_usage, 0, 16);
+    lv_bar_set_range(perf_metrics_ui.bar_ram_usage, 0, 100);
 
 }
 
@@ -299,19 +299,19 @@ static enum smf_state_result performance_metrics_on_state_run(void* o) {
         new_data = false;
 
         // Process incoming scalar metrics
-        char cpu_clock_text[SCALAR_METRIC_MAX_LENGTH];
-        char cpu_power_text[SCALAR_METRIC_MAX_LENGTH];
-        char cpu_temp_text[SCALAR_METRIC_MAX_LENGTH];
-        char gpu_temp_text[SCALAR_METRIC_MAX_LENGTH];
-        char network_down_text[SCALAR_METRIC_MAX_LENGTH];
-        char network_up_text[SCALAR_METRIC_MAX_LENGTH];
+        char cpu_clock_text[METRIC_MAX_LENGTH];
+        char cpu_power_text[METRIC_MAX_LENGTH];
+        char cpu_temp_text[METRIC_MAX_LENGTH];
+        char gpu_temp_text[METRIC_MAX_LENGTH];
+        char network_down_text[METRIC_MAX_LENGTH];
+        char network_up_text[METRIC_MAX_LENGTH];
 
-        snprintf(cpu_clock_text, sizeof(cpu_clock_text), "CPU Clock (MHz): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_clock_mhz);
-        snprintf(cpu_power_text, sizeof(cpu_power_text), "CPU Power (W): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_power_watts);
-        snprintf(cpu_temp_text, sizeof(cpu_temp_text), "CPU Temp (C): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_temp_celsius);
-        snprintf(gpu_temp_text, sizeof(gpu_temp_text), "GPU Temp (C): %u", ble_cpu_gpu_scalar_metrics_characteristic_data.gpu_temp_celsius);
-        snprintf(network_down_text, sizeof(network_down_text), "Net Down (Mb/s): %u", ble_network_scalar_metrics_characteristic_data.network_down_bits);
-        snprintf(network_up_text, sizeof(network_up_text), "Net Up (Mb/s): %u", ble_network_scalar_metrics_characteristic_data.network_up_bits);
+        snprintf(cpu_clock_text, sizeof(cpu_clock_text), "CPU Clock: %u MHz", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_clock_mhz);
+        snprintf(cpu_power_text, sizeof(cpu_power_text), "CPU Power: %u W", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_power_watts);
+        snprintf(cpu_temp_text, sizeof(cpu_temp_text), "CPU Temp: %u°C", ble_cpu_gpu_scalar_metrics_characteristic_data.cpu_temp_celsius);
+        snprintf(gpu_temp_text, sizeof(gpu_temp_text), "GPU Temp: %u°C", ble_cpu_gpu_scalar_metrics_characteristic_data.gpu_temp_celsius);
+        snprintf(network_down_text, sizeof(network_down_text), "Net Down: %u Kb/s", ble_network_scalar_metrics_characteristic_data.network_down_bits);
+        snprintf(network_up_text, sizeof(network_up_text), "Net Up: %u Kb/s", ble_network_scalar_metrics_characteristic_data.network_up_bits);
 
         lv_label_set_text(perf_metrics_ui.label_cpu_clock, cpu_clock_text); 
         lv_label_set_text(perf_metrics_ui.label_cpu_power, cpu_power_text);
@@ -321,9 +321,21 @@ static enum smf_state_result performance_metrics_on_state_run(void* o) {
         lv_label_set_text(perf_metrics_ui.label_net_upload, network_up_text);
 
         // Process percentage metrics
-        lv_bar_set_value(perf_metrics_ui.bar_cpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.cpu_usage_percent, LV_ANIM_OFF);
-        lv_bar_set_value(perf_metrics_ui.bar_gpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.gpu_usage_percent, LV_ANIM_OFF);
-        lv_bar_set_value(perf_metrics_ui.bar_ram_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.ram_usage_gb, LV_ANIM_OFF);
+        char cpu_usage_text[METRIC_MAX_LENGTH];
+        char gpu_usage_text[METRIC_MAX_LENGTH];
+        char ram_usage_text[METRIC_MAX_LENGTH];
+
+        snprintf(cpu_usage_text, sizeof(cpu_usage_text), "CPU Usage: %u%%", ble_cpu_gpu_ram_percentage_metrics_characteristic_data.cpu_usage_percent);
+        snprintf(gpu_usage_text, sizeof(gpu_usage_text), "GPU Usage: %u%%", ble_cpu_gpu_ram_percentage_metrics_characteristic_data.gpu_usage_percent);
+        snprintf(ram_usage_text, sizeof(ram_usage_text), "RAM Usage: %u%%", ble_cpu_gpu_ram_percentage_metrics_characteristic_data.ram_usage_percent);
+
+        lv_label_set_text(perf_metrics_ui.cpu_usage_title, cpu_usage_text);
+        lv_label_set_text(perf_metrics_ui.gpu_usage_title, gpu_usage_text);
+        lv_label_set_text(perf_metrics_ui.ram_usage_title, ram_usage_text);
+
+        lv_bar_set_value(perf_metrics_ui.bar_cpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.cpu_usage_percent, LV_ANIM_ON);
+        lv_bar_set_value(perf_metrics_ui.bar_gpu_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.gpu_usage_percent, LV_ANIM_ON);
+        lv_bar_set_value(perf_metrics_ui.bar_ram_usage, ble_cpu_gpu_ram_percentage_metrics_characteristic_data.ram_usage_percent, LV_ANIM_ON);
     }
 
     return SMF_EVENT_HANDLED;
