@@ -102,12 +102,14 @@ def read_hwinfo_shared_memory():
     reading_fmt = "<III128s128s16sdddd"
     unpack_size = struct.calcsize(reading_fmt)
     
-    cpu_clock = 0 # Represents the average of all individual core clocks
+    cpu_clock = 0 # Currently represents the maximum individual core clock within the CPU
     cpu_temp = 0
     cpu_power = 0 
 
-    # To calculate average of all core clocks
-    core_clocks = []
+    # # To calculate average of all core clocks
+    # core_clocks = []
+
+    max_core_clock = 0
 
     # Loop through the Reading Element struct to find our CPU temp and package power readings
     for i in range(num_readings):
@@ -138,15 +140,18 @@ def read_hwinfo_shared_memory():
 
             # We want to display the average of the individual core clocks that we read
             if ("P-core" in label_orig or "E-core" in label_orig) and "Clock" in label_orig and "Effective" not in label_orig:
-                core_clocks.append(value)
+                # core_clocks.append(value)
+                if value > max_core_clock:
+                    max_core_clock = value
 
     # Always clean up the memory map mapping
     shared_memory.close()
 
-    for value in core_clocks:
-        cpu_clock += value
+    # for value in core_clocks:
+    #     cpu_clock += value
 
-    cpu_clock = cpu_clock / len(core_clocks) # Get average core clock
+    # cpu_clock = cpu_clock / len(core_clocks) # Get average core clock
+    cpu_clock = max_core_clock
 
     return cpu_clock, cpu_temp, cpu_power
 
