@@ -86,13 +86,13 @@ The screen is divided into two primary containers to organize the data density e
 
 ??? (W.I.P. until performance metrics functionality is fully implemented)
 
-### Stage 2. Develop the bluetooth peripheral (our nRF52840, GATT server) architecture (IN-PROGRESS)
+### Stage 2. Develop the bluetooth peripheral (our nRF52840, GATT server) architecture (COMPLETED)
 
-### Stage 3. Develop the bluetooth central (PC running a Python script, GATT client) architecture (TO DO)
+### Stage 3. Develop the bluetooth central (PC running a Python script, GATT client) architecture (COMPLETED)
 
-### Stage 4. Unify the bluetooth GATT server and client and achieve communication (TO DO)
+### Stage 4. Unify the bluetooth GATT server and client and achieve communication (COMPLETED)
 
-### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics) (TO DO)
+### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics) (COMPLETED)
 
 ### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC (TO DO)
 
