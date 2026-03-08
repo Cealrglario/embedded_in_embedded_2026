@@ -37,6 +37,12 @@ typedef struct {
     uint32_t ram_usage_percent; // MSB (end write)
 } cpu_gpu_ram_percentage_metrics_t;
 
+typedef struct {
+    bool play;
+    bool pause;
+    bool skip_forward;
+    bool skip_backward;
+} media_controls_commands_t; // struct that stores any commanded media controls functionality to send out as a notification to a paired device
 /**
  * Service and Characteristic Setup
  */
