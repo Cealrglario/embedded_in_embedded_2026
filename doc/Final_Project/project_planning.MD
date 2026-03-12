@@ -94,10 +94,12 @@ The screen is divided into two primary containers to organize the data density e
 
 ### Stage 5. Display performance metrics on the nRF52840 (for now, just a set number of metrics) (COMPLETED)
 
-### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC (TO DO)
+~~### Stage 6. Implement media controls on the nRF52840 that modifies media playing on a PC (TO DO)~~
 
-### Stage 7. Implement toggleable metrics (can show different metrics on screen) (TO DO)
+~~### Stage 7. Implement toggleable metrics (can show different metrics on screen) (TO DO)~~
 
-### Stage 8. Refinements, bug fixes, small extra functionalities??? (TO DO)
+### Stage 6. Display computer details (system name, CPU type, GPU type) on the nRF52840) (IN-PROGRESS)
+
+### Stage 7. Refinements, bug fixes, small extra functionalities??? (TO DO)
 
 
