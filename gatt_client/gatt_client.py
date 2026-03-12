@@ -227,7 +227,7 @@ def get_computer_details():
     cpu_details = cpuinfo.get_cpu_info()['brand_raw']
     gpu_details = pynvml.nvmlDeviceGetName(gpu_handle)
 
-    return system_details[:20], cpu_details[:20], gpu_details[:20]
+    return system_details, cpu_details, gpu_details
      
 '''
 Data Serialization (The "struct" module)
