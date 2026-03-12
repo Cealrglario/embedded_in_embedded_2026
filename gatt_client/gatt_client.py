@@ -9,6 +9,8 @@ import bleak
 import time
 import asyncio
 import mmap
+import platform
+import cpuinfo
 
 TARGET_DEVICE_NAME = "EiE 6248 Hardware Monitor" # Match the Zephyr config
 
@@ -17,6 +19,9 @@ CHAR_UUID_SERVICE = "01928374-1234-5678-1234-56789abcdef0"
 CHAR_UUID_SCALAR = "01928374-1234-5678-1234-56789abcdef1"
 CHAR_UUID_NETWORK = "01928374-1234-5678-1234-56789abcdef2"
 CHAR_UUID_PERCENT = "01928374-1234-5678-1234-56789abcdef3"
+CHAR_UUID_SYSTEM_DETAILS = "01928374-1234-5678-1234-56789abcdef4"
+CHAR_UUID_CPU_DETAILS = "01928374-1234-5678-1234-56789abcdef5"
+CHAR_UUID_GPU_DETAILS = "01928374-1234-5678-1234-56789abcdef6"
 
 # Define the shared memory name to obtain motherboard sensor data from HWiNFO64
 shm_name = "Global\\HWiNFO_SENS_SM2"
@@ -157,8 +162,8 @@ def read_hwinfo_shared_memory():
 
 
 def get_scalar_metrics():
-    ## Use HWiNFO64 shared memory for CPU Clock/Temp/Power
-    ## Use pynvml to get GPU Temp
+    # Use HWiNFO64 shared memory for CPU Clock/Temp/Power
+    # Use pynvml to get GPU Temp
     cpu_clock, cpu_temp, cpu_power = read_hwinfo_shared_memory() # Retrieve instantaneous CPU temperature and package power
     
     # If CPU temp/power is None, then handle it and notify user to run HWiNFO with shared memory support
@@ -174,8 +179,8 @@ def get_scalar_metrics():
     return int(cpu_clock), int(cpu_power), int(cpu_temp), int(gpu_temp)
 
 def get_network_metrics():
-    ## Use psutil.net_io_counters() to get bytes sent/recv
-    ## Convert to bits
+    # Use psutil.net_io_counters() to get bytes sent/recv
+    # Convert to bits
     global last_net_bytes_recv
     global last_net_bytes_sent
     global last_net_time
@@ -198,16 +203,31 @@ def get_network_metrics():
     return int(down_bits), int(up_bits)
 
 def get_percentage_metrics():
-    ## Use psutil for CPU % and RAM usage (convert bytes to GB)
-    ## Use pynvml for GPU %
+    # Use psutil for CPU % and RAM usage (convert bytes to GB)
+    # Use pynvml for GPU %
     cpu_percent = psutil.cpu_percent(interval=None) # Retrieve instantaneous CPU usage percentage
-    gpu_util = pynvml.nvmlDeviceGetUtilizationRates(gpu_handle) # Retrieve instantaneous GPU usage percentage
-    gpu_percent = gpu_util.gpu
+    
+    try:
+        gpu_util = pynvml.nvmlDeviceGetUtilizationRates(gpu_handle) # Retrieve instantaneous GPU usage percentage
+        gpu_percent = gpu_util.gpu
+    except(pynvml.NVMLError):
+        gpu_percent = 0
 
     ram_usage_percent = psutil.virtual_memory().percent # Retrieve instantaneous RAM usage in percent
 
     print(f'Received percentage metrics: CPU Percent ({cpu_percent}%), GPU Percent ({gpu_percent}%), RAM Percent ({ram_usage_percent}%)')
     return int(cpu_percent), int(gpu_percent), int(ram_usage_percent)
+
+def get_computer_details():
+    # use platform to get system name
+    # use cpuinfo to get CPU name 
+    # use pynvml to get GPU name
+
+    system_details = platform.node()
+    cpu_details = cpuinfo.get_cpu_info()['brand_raw']
+    gpu_details = pynvml.nvmlDeviceGetName(gpu_handle)
+
+    return system_details[:20], cpu_details[:20], gpu_details[:20]
      
 '''
 Data Serialization (The "struct" module)
@@ -219,12 +239,15 @@ Data Serialization (The "struct" module)
 
 def pack_metrics_to_bytes(metric_type, data_array):
     # NOTE: the '*' operator before the data_array parameter deconstructs a tuple into individual elements, which is required for struct.pack() to work
+    # unless the data_array parameter is a string (which it will be for details) and in that case we don't need to deconstruct it
     if metric_type == "scalar":
         return struct.pack("<IIII", *data_array) # 4 integers = 16 bytes
     if metric_type == "network":
         return struct.pack("<II", *data_array)   # 2 integers = 8 bytes
     if metric_type == "percent":
         return struct.pack("<III", *data_array)  # 3 integers = 12 bytes
+    if metric_type == "details":
+        return data_array.encode('utf-8')
     else:
         raise ValueError("Unknown metric type")
 
@@ -242,6 +265,17 @@ async def run_ble_client():
     # Step 2: Establish Connection
     async with bleak.BleakClient(device) as client:
         print("Connected!")
+        system_details, cpu_details, gpu_details = get_computer_details()
+
+        # Pack details
+        system_details_bytes = pack_metrics_to_bytes("details", system_details)
+        cpu_details_bytes = pack_metrics_to_bytes("details", cpu_details)
+        gpu_details_bytes = pack_metrics_to_bytes("details", gpu_details)
+
+        # We only want to send computer details to the server one time
+        await client.write_gatt_char(CHAR_UUID_SYSTEM_DETAILS, system_details_bytes, response=False)
+        await client.write_gatt_char(CHAR_UUID_CPU_DETAILS, cpu_details_bytes, response=False)
+        await client.write_gatt_char(CHAR_UUID_GPU_DETAILS, gpu_details_bytes, response=False)
         
         # Step 3: The infinite transmission loop
         while True:
