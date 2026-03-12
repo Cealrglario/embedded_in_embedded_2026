@@ -15,7 +15,7 @@
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/uuid.h>
 
-#define BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH 20
+#define BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH 64
 
 /**
  * Typedefs
