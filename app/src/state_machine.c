@@ -375,6 +375,7 @@ static void computer_details_on_state_entry(void* o) {
     lv_obj_set_flex_flow(details_container, LV_FLEX_FLOW_COLUMN); // Display objects neatly side-by-side with flex
     lv_obj_set_flex_align(details_container, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER,
         LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_all(details_container, 20, 0);
 
     computer_details_ui.label_system_details = lv_label_create(details_container);
     lv_label_set_text(computer_details_ui.label_system_details, "System: --");
