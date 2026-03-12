@@ -18,9 +18,9 @@ static enum smf_state_result main_menu_on_state_run(void* o);
 static void performance_metrics_on_state_entry(void* o);
 static enum smf_state_result performance_metrics_on_state_run(void* o);
 
-// Media controls page
-static void media_controls_on_state_entry(void* o);
-static enum smf_state_result media_controls_on_state_run(void* o);
+// Computer details page
+static void computer_details_on_state_entry(void* o);
+static enum smf_state_result computer_details_on_state_run(void* o);
 
 // Button press menu transition callback
 void lv_change_menu_cb(lv_event_t* event);
@@ -32,7 +32,7 @@ void lv_change_menu_cb(lv_event_t* event);
 enum ui_state_machine_states {
     MAIN_MENU,
     PERFORMANCE_METRICS,
-    MEDIA_CONTROLS
+    COMPUTER_DETAILS
 };
 
 // Object that Zephyr uses to keep track of current state (this is what is constantly ran inside the super loop)
@@ -87,14 +87,22 @@ typedef struct {
     lv_obj_t* ram_usage_title;
 } perf_metrics_ui_t;
 
+typedef struct {
+    lv_obj_t* label_system_details;
+    lv_obj_t* label_cpu_details;
+    lv_obj_t* label_gpu_details;
+} computer_details_ui_t;
+
+
 // Static struct that ACTUALLY holds our performance metrics data that we're updated during runtime
 static perf_metrics_ui_t perf_metrics_ui;
+static computer_details_ui_t computer_details_ui;
 
 // Struct that holds the actual states that Zephyr will traverse throughout runtime
 static const struct smf_state ui_states[] = {
     [MAIN_MENU] = SMF_CREATE_STATE(main_menu_on_state_entry, main_menu_on_state_run, NULL, NULL, NULL),
     [PERFORMANCE_METRICS] = SMF_CREATE_STATE(performance_metrics_on_state_entry, performance_metrics_on_state_run, NULL, NULL, NULL),
-    [MEDIA_CONTROLS] = SMF_CREATE_STATE(media_controls_on_state_entry, media_controls_on_state_run, NULL, NULL, NULL)
+    [COMPUTER_DETAILS] = SMF_CREATE_STATE(computer_details_on_state_entry, computer_details_on_state_run, NULL, NULL, NULL)
 };
 
 // Indicates the next state to transition to
@@ -102,7 +110,7 @@ static enum ui_state_machine_states next_state = -1; // -1 indicates no state ch
 
 // Objects that hold the enum value of states that can be transitioned to for button callback pointers
 static enum ui_state_machine_states perf_metrics_state = PERFORMANCE_METRICS;
-static enum ui_state_machine_states media_controls_state = MEDIA_CONTROLS;
+static enum ui_state_machine_states computer_details_state = COMPUTER_DETAILS;
 
 void state_machine_init() {
     // Set initial state to be the main menu
@@ -142,7 +150,7 @@ static void main_menu_on_state_entry(void* o) {
     //     // Add text to the button
     //     lv_obj_t* button_label = lv_label_create(ui_btn); 
     //     char label_text[BUTTON_TEXT_MAX_LENGTH];
-    //     snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Media Controls");
+    //     snprintf(label_text, BUTTON_TEXT_MAX_LENGTH, i % 2 ? "Performance Metrics" : "Computer Details");
     //     lv_label_set_text(button_label, label_text);
     //     lv_obj_align(button_label, LV_ALIGN_CENTER, 0, 0);
     // }
@@ -167,16 +175,16 @@ static void main_menu_on_state_entry(void* o) {
     // When the Performance Metrics button is clicked, we want to transition to that state/menu
     lv_obj_add_event_cb(perf_metrics_button, lv_change_menu_cb, LV_EVENT_CLICKED, perf_state);
 
-    // // Create the Media Controls button and associate the state
-    // lv_obj_t* media_controls_button = lv_button_create(button_container);
-    // lv_obj_t* media_controls_text = lv_label_create(media_controls_button); // add the button text
-    // lv_label_set_text(media_controls_text, "Media Controls");
+    // Create the Computer Details button and associate the state
+    lv_obj_t* computer_details_button = lv_button_create(button_container);
+    lv_obj_t* computer_details_text = lv_label_create(computer_details_button); // add the button text
+    lv_label_set_text(computer_details_text, "Computer Details");
 
-    // // Data to send to the menu change callback when the button is clicked
-    // lv_obj_t* media_state = lv_data_obj_create_alloc_assign(media_controls_button, &media_controls_state, sizeof(MEDIA_CONTROLS));
+    // Data to send to the menu change callback when the button is clicked
+    lv_obj_t* details_state = lv_data_obj_create_alloc_assign(computer_details_button, &computer_details_state, sizeof(COMPUTER_DETAILS));
 
-    // // When the Media Controls button is clicked, we want to transition to that state/menu
-    // lv_obj_add_event_cb(media_controls_button, lv_change_menu_cb, LV_EVENT_CLICKED, media_state);
+    // When the Computer Details button is clicked, we want to transition to that state/menu
+    lv_obj_add_event_cb(computer_details_button, lv_change_menu_cb, LV_EVENT_CLICKED, details_state);
 }
 
 static enum smf_state_result main_menu_on_state_run(void* o) {
@@ -186,9 +194,9 @@ static enum smf_state_result main_menu_on_state_run(void* o) {
         next_state = -1; // Clear the next state flag since we're now handling the transition
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[PERFORMANCE_METRICS]);
     }
-    else if (next_state == MEDIA_CONTROLS) {
+    else if (next_state == COMPUTER_DETAILS) {
         next_state = -1; // Clear the next state flag since we're now handling the transition
-        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MEDIA_CONTROLS]);
+        smf_set_state(SMF_CTX(&ui_state_object), &ui_states[COMPUTER_DETAILS]);
     }
 
     return SMF_EVENT_HANDLED;
@@ -342,9 +350,9 @@ static enum smf_state_result performance_metrics_on_state_run(void* o) {
 }
 
 /**
- * Media controls states
+ * Computer details states
  */
-static void media_controls_on_state_entry(void* o) {
+static void computer_details_on_state_entry(void* o) {
     // Clear any existing screen contents to display the new menu
     lv_obj_clean(screen);
 
@@ -361,14 +369,44 @@ static void media_controls_on_state_entry(void* o) {
      * throughout runtime since these hold actual data unlike other LVGL components which are essentially purely visual.
      * These metrics will be "fed" to the visual LVGL components to display metrics on our LCD.
      */
+
+    lv_obj_t* details_container = lv_obj_create(screen);
+    lv_obj_set_size(details_container, lv_pct(100), lv_pct(100));
+    lv_obj_set_flex_flow(details_container, LV_FLEX_FLOW_COLUMN); // Display objects neatly side-by-side with flex
+    lv_obj_set_flex_align(details_container, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER,
+        LV_FLEX_ALIGN_CENTER);
+
+    computer_details_ui.label_system_details = lv_label_create(details_container);
+    lv_label_set_text(computer_details_ui.label_system_details, "System: --");
+
+    computer_details_ui.label_cpu_details = lv_label_create(details_container);
+    lv_label_set_text(computer_details_ui.label_cpu_details, "CPU: --");
+
+    computer_details_ui.label_gpu_details = lv_label_create(details_container);
+    lv_label_set_text(computer_details_ui.label_gpu_details, "GPU: --");
 }
 
-static enum smf_state_result media_controls_on_state_run(void* o) {
+static enum smf_state_result computer_details_on_state_run(void* o) {
     lv_timer_handler();
     
     if (gpio_pin_get_dt(&button)) {
         // Go back to the main menu
         smf_set_state(SMF_CTX(&ui_state_object), &ui_states[MAIN_MENU]);
+    }
+    else if (new_data) {
+        new_data = false; // acknowledge that we are processing data
+
+        char system_details_text[METRIC_MAX_LENGTH];
+        char cpu_details_text[METRIC_MAX_LENGTH];
+        char gpu_details_text[METRIC_MAX_LENGTH];
+
+        snprintf(system_details_text, sizeof(system_details_text), "System: %s", ble_system_details);
+        snprintf(cpu_details_text, sizeof(cpu_details_text), "CPU: %s", ble_cpu_details);
+        snprintf(gpu_details_text, sizeof(gpu_details_text), "GPU: %s", ble_gpu_details);
+
+        lv_label_set_text(computer_details_ui.label_system_details, system_details_text);
+        lv_label_set_text(computer_details_ui.label_cpu_details, cpu_details_text);
+        lv_label_set_text(computer_details_ui.label_gpu_details, gpu_details_text);
     }
 
     return SMF_EVENT_HANDLED;
