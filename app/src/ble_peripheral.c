@@ -11,6 +11,11 @@
 // Flag indicating whether or not there is new data for LVGL to re-draw onto the LCD
 bool new_data = false;
 
+// + 1 for the null terminators
+char ble_system_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+char ble_cpu_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+char ble_gpu_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+
 static const struct bt_uuid_128 ble_hardware_monitor_service_uuid = BT_UUID_INIT_128(BLE_HARDWARE_MONITOR_SERVICE_UUID);
 
 static const struct bt_uuid_128 ble_cpu_gpu_scalar_metrics_characteristic_uuid =
@@ -21,6 +26,15 @@ static const struct bt_uuid_128 ble_network_scalar_metrics_characteristic_uuid =
 
 static const struct bt_uuid_128 ble_cpu_gpu_ram_percentage_metrics_characteristic_uuid =
     BT_UUID_INIT_128(BLE_CPU_GPU_RAM_PERCENTAGE_METRICS_CHARACTERISTIC);
+
+static const struct bt_uuid_128 ble_system_details_characteristic_uuid =
+    BT_UUID_INIT_128(BLE_SYSTEM_DETAILS_CHARACTERISTIC);
+
+static const struct bt_uuid_128 ble_cpu_details_characteristic_uuid =
+    BT_UUID_INIT_128(BLE_CPU_DETAILS_CHARACTERISTIC);
+
+static const struct bt_uuid_128 ble_gpu_details_characteristic_uuid =
+    BT_UUID_INIT_128(BLE_GPU_DETAILS_CHARACTERISTIC);
 
 // Data actively advertised for GATT clients to see
 const struct bt_data ble_advertising_data[] = {
@@ -55,6 +69,18 @@ static ssize_t ble_network_scalar_metrics_write_cb(struct bt_conn* conn, const s
                                         uint8_t flags);
 
 static ssize_t ble_cpu_gpu_ram_percentage_metrics_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags);
+
+static ssize_t ble_system_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags);
+
+static ssize_t ble_cpu_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags);
+                                    
+static ssize_t ble_gpu_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
                                         const void* buf, uint16_t len, uint16_t offset,
                                         uint8_t flags);
 
@@ -97,6 +123,36 @@ BT_GATT_SERVICE_DEFINE(
         ble_cpu_gpu_ram_percentage_metrics_write_cb, // Callback for when this characteristic is written to
         &ble_cpu_gpu_ram_percentage_metrics_characteristic_data // Address where we want data stored for this characteristic
         ),
+
+    // FOR SYSTEM DETAILS
+    BT_GATT_CHARACTERISTIC(
+        &ble_system_details_characteristic_uuid.uuid, // Setting the characteristic UUID
+        BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
+        BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
+        ble_system_details_write_cb, // Callback for when this characteristic is written to
+        &ble_system_details // Address where we want data stored for this characteristic
+        ),
+
+    // FOR CPU DETAILS
+    BT_GATT_CHARACTERISTIC(
+        &ble_cpu_details_characteristic_uuid.uuid, // Setting the characteristic UUID
+        BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
+        BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
+        ble_cpu_details_write_cb, // Callback for when this characteristic is written to
+        &ble_cpu_details // Address where we want data stored for this characteristic
+        ),
+
+    // FOR GPU DETAILS
+    BT_GATT_CHARACTERISTIC(
+        &ble_gpu_details_characteristic_uuid.uuid, // Setting the characteristic UUID
+        BT_GATT_CHRC_WRITE_WITHOUT_RESP, // A connected GATT client can write to this characteristic, and we don't need to reply with an ack
+        BT_GATT_PERM_WRITE, // Permissions that connecting devices have
+        NULL, // We don't need a callback for reading as a client doesn't read our characteristics
+        ble_gpu_details_write_cb, // Callback for when this characteristic is written to
+        &ble_gpu_details // Address where we want data stored for this characteristic
+        ),
     // End of service definition
 );
 
@@ -118,8 +174,8 @@ static ssize_t ble_cpu_gpu_scalar_metrics_write_cb(struct bt_conn* conn, const s
 
     // If data received is over the maximum we expect
     if (len != sizeof(cpu_gpu_scalar_metrics_t) || offset != 0) {
-    printk("[BLE] ble_cpu_gpu_scalar_metrics_write_cb: Received oversized data.\n");
-    return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+        printk("[BLE] ble_cpu_gpu_scalar_metrics_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
     }
 
     // Since each incoming metric is packed in its own uint32_t with no need to consider padding, we can simply write all incoming bytes
@@ -147,8 +203,8 @@ static ssize_t ble_network_scalar_metrics_write_cb(struct bt_conn* conn, const s
 
     // If data received is over the maximum we expect
     if (len != sizeof(network_scalar_metrics_t) || offset != 0) {
-    printk("[BLE] ble_network_scalar_metrics_write_cb: Received oversized data.\n");
-    return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+        printk("[BLE] ble_network_scalar_metrics_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
     }
 
     // Since each incoming metric is packed in its own uint32_t with no need to consider padding, we can simply write all incoming bytes
@@ -176,8 +232,8 @@ static ssize_t ble_cpu_gpu_ram_percentage_metrics_write_cb(struct bt_conn* conn,
 
     // If data received is over the maximum we expect
     if (len != sizeof(cpu_gpu_ram_percentage_metrics_t) || offset != 0) {
-    printk("[BLE] ble_cpu_gpu_ram_percentage_metrics_write_cb: Received oversized data.\n");
-    return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+        printk("[BLE] ble_cpu_gpu_ram_percentage_metrics_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
     }
 
     // Since each incoming metric is packed in its own uint32_t with no need to consider padding, we can simply write all incoming bytes
@@ -190,4 +246,97 @@ static ssize_t ble_cpu_gpu_ram_percentage_metrics_write_cb(struct bt_conn* conn,
      
     return len;
 };
+
+static ssize_t ble_system_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags) {
+    /**
+     * conn: pointer representing the BLE connection to the GATT client
+     * attr: points to the characteristic being written to defined in BT_GATT_SERVICE_DEFINE, attr->user_data POINTS to the struct holding the actual data
+     * buf: raw bytestream coming from GATT client
+     * len: length of the bytestream coming from the GATT client
+     * offset: only matters if incoming bytestream is greater than maximum per write (20 bytes), which we won't allow so we can ignore this
+     * flags: indicates type of BLE write (in this case, Write Without Response), not important
+     */ 
+
+    // If data received is over the maximum we can receive
+    if(offset != 0 || len > BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH) {
+        printk("[BLE] ble_system_details_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+    }
+
+    char* data = attr->user_data;
+
+    // Copy and save received strings
+    memcpy(data, buf, len);
+    data[len] = 0; // null termination
+    printk("Received system details from GATT client.\n");
+
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
+
+    return len;
+}
+
+static ssize_t ble_cpu_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags) {
+    /**
+     * conn: pointer representing the BLE connection to the GATT client
+     * attr: points to the characteristic being written to defined in BT_GATT_SERVICE_DEFINE, attr->user_data POINTS to the struct holding the actual data
+     * buf: raw bytestream coming from GATT client
+     * len: length of the bytestream coming from the GATT client
+     * offset: only matters if incoming bytestream is greater than maximum per write (20 bytes), which we won't allow so we can ignore this
+     * flags: indicates type of BLE write (in this case, Write Without Response), not important
+     */ 
+
+    // If data received is over the maximum we can receive
+    if(offset != 0 || len > BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH) {
+        printk("[BLE] ble_cpu_details_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+    }
+
+    char* data = attr->user_data;
+
+    // Copy and save received strings
+    memcpy(data, buf, len);
+    data[len] = 0; // null termination
+    printk("Received CPU details from GATT client.\n");
+
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
+
+    return len;
+}
+                                    
+static ssize_t ble_gpu_details_write_cb(struct bt_conn* conn, const struct bt_gatt_attr* attr,
+                                        const void* buf, uint16_t len, uint16_t offset,
+                                        uint8_t flags) {
+    /**
+     * conn: pointer representing the BLE connection to the GATT client
+     * attr: points to the characteristic being written to defined in BT_GATT_SERVICE_DEFINE, attr->user_data POINTS to the struct holding the actual data
+     * buf: raw bytestream coming from GATT client
+     * len: length of the bytestream coming from the GATT client
+     * offset: only matters if incoming bytestream is greater than maximum per write (20 bytes), which we won't allow so we can ignore this
+     * flags: indicates type of BLE write (in this case, Write Without Response), not important
+     */ 
+
+    // If data received is over the maximum we can receive
+    if(offset != 0 || len > BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH) {
+        printk("[BLE] ble_gpu_details_write_cb: Received oversized data.\n");
+        return BT_GATT_ERR(BT_ATT_ERR_OUT_OF_RANGE);
+    }
+
+    char* data = attr->user_data;
+
+    // Copy and save received strings
+    memcpy(data, buf, len);
+    data[len] = 0; // null termination
+    printk("Received GPU details from GATT client.\n");
+
+    // Indicate to LVGL that new data is available to process
+    new_data = true;
+
+    return len;
+}
 

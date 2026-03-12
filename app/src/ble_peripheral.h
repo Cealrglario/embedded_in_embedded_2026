@@ -15,6 +15,8 @@
 #include <zephyr/bluetooth/hci.h>
 #include <zephyr/bluetooth/uuid.h>
 
+#define BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH 20
+
 /**
  * Typedefs
  */
@@ -37,6 +39,11 @@ typedef struct {
     uint32_t ram_usage_percent; // MSB (end write)
 } cpu_gpu_ram_percentage_metrics_t;
 
+// + 1 for the null terminators
+extern char ble_system_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+extern char ble_cpu_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+extern char ble_gpu_details[BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH + 1];
+
 /**
  * Service and Characteristic Setup
  */
@@ -53,6 +60,13 @@ typedef struct {
 #define BLE_CPU_GPU_RAM_PERCENTAGE_METRICS_CHARACTERISTIC \
     BT_UUID_128_ENCODE(0x01928374, 0x1234, 0x5678, 0x1234, 0x56789abcdef3)
 
-#define BLE_CUSTOM_CHARACTERISTIC_MAX_DATA_LENGTH 20
+#define BLE_SYSTEM_DETAILS_CHARACTERISTIC \
+    BT_UUID_128_ENCODE(0x01928374, 0x1234, 0x5678, 0x1234, 0x56789abcdef4)
+
+#define BLE_CPU_DETAILS_CHARACTERISTIC \
+    BT_UUID_128_ENCODE(0x01928374, 0x1234, 0x5678, 0x1234, 0x56789abcdef5)
+
+#define BLE_GPU_DETAILS_CHARACTERISTIC \
+    BT_UUID_128_ENCODE(0x01928374, 0x1234, 0x5678, 0x1234, 0x56789abcdef6)
 
 #endif
